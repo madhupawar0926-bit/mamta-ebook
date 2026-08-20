@@ -2,7 +2,6 @@ import {
   Menu,
   Search,
   Bell,
-  ChevronDown,
 } from "lucide-react";
 
 import { useLocation } from "react-router-dom";
@@ -84,7 +83,7 @@ function Header({ onMenuClick }: HeaderProps) {
         </button>
 
 
-        <div className="header-user">
+        {/* <div className="header-user">
 
           <div className="header-avatar">
             AU
@@ -97,7 +96,7 @@ function Header({ onMenuClick }: HeaderProps) {
 
           <ChevronDown size={16} />
 
-        </div>
+        </div> */}
 
       </div>
 

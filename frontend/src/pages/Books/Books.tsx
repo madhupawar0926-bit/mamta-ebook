@@ -441,7 +441,7 @@ export function Books() {
           =================================================== */}
 
       <div className="books-page-header">
- <div className="books-tabs">
+ {/* <div className="books-tabs">
 
         <button
           type="button"
@@ -457,7 +457,7 @@ export function Books() {
           All Books
         </button>
 
-      </div>
+      </div> */}
        
 
 

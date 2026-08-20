@@ -5,7 +5,7 @@ import {
   LogOut,
   IndianRupee,
 } from "lucide-react";
-
+import logo from "../assets/logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import "./Sidebar.css";
@@ -56,12 +56,9 @@ export function Sidebar({
 
         <div className="sidebar-brand">
 
-          <div className="brand-logo">
-            <BookOpen
-              size={28}
-              strokeWidth={1.6}
-            />
-          </div>
+         <div className="brand-logo">
+  <img src={logo} alt="Logo" />
+</div>
 
           <div className="brand-text">
             <strong>MAMTA</strong>
@@ -118,7 +115,7 @@ export function Sidebar({
             />
 
             <span>
-              Books
+              Category
             </span>
           </NavLink>
 

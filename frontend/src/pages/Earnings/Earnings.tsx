@@ -8,13 +8,14 @@ import {
 } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import "./Earnings.css";
 
-
 /* =========================================================
    TYPES
-========================================================= */
+   ========================================================= */
 
 type StatType =
   | "positive"
@@ -79,10 +80,9 @@ type EarningsData = {
   purchasesGrowth: string;
 };
 
-
 /* =========================================================
    FALLBACK DATA
-========================================================= */
+   ========================================================= */
 
 const fallbackData: EarningsData = {
   stats: [
@@ -121,8 +121,6 @@ const fallbackData: EarningsData = {
       icon: Clock3,
       iconClass: "orange",
     },
-
-    
   ],
 
   monthlyData: [
@@ -289,39 +287,62 @@ const fallbackData: EarningsData = {
   purchasesGrowth: "15.7% vs last month",
 };
 
-
 const API_ENDPOINT =
   "/api/earnings/overview";
 
-
 /* =========================================================
    EARNINGS
-========================================================= */
+   ========================================================= */
 
 export default function Earnings() {
-
   const [data, setData] =
     useState<EarningsData>(fallbackData);
 
   const [range, setRange] =
     useState("30D");
 
+  /* =======================================================
+     DATE RANGE PICKER
+     ======================================================= */
+
+  const [dateRange, setDateRange] = useState<
+    [Date | null, Date | null]
+  >([
+    new Date(2026, 7, 14),
+    new Date(2026, 7, 14),
+  ]);
+
+  const [startDate, endDate] =
+    dateRange;
+
+  const formatDate = (
+    date: Date | null
+  ) => {
+    if (!date) return "";
+
+    return date.toLocaleDateString(
+      "en-GB",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    );
+  };
 
   /* =======================================================
      LOAD API DATA
-  ======================================================= */
+     ======================================================= */
 
   useEffect(() => {
-
     let active = true;
 
     const load = async () => {
-
       try {
-
         const response = await fetch(
           `${
-            import.meta.env.VITE_API_BASE_URL || ""
+            import.meta.env
+              .VITE_API_BASE_URL || ""
           }${API_ENDPOINT}`,
           {
             credentials: "include",
@@ -334,19 +355,14 @@ export default function Earnings() {
           (await response.json()) as Partial<EarningsData>;
 
         if (active) {
-
           setData((current) => ({
             ...current,
             ...payload,
           }));
-
         }
-
       } catch {
-
         // Keep fallback data silently
         // until API is connected.
-
       }
     };
 
@@ -355,31 +371,22 @@ export default function Earnings() {
     return () => {
       active = false;
     };
-
   }, []);
-
 
   /* =======================================================
      CHART CALCULATION
-  ======================================================= */
+     ======================================================= */
 
   const chart = useMemo(() => {
-
     const width = 900;
-
     const height = 240;
-
     const max = 50;
-
     const top = 10;
-
     const bottom = 220;
-
 
     const revenuePoints =
       data.chartData.map(
         (item, index) => {
-
           const x =
             (index /
               Math.max(
@@ -397,15 +404,12 @@ export default function Earnings() {
             x,
             y,
           };
-
         }
       );
-
 
     const purchasePoints =
       data.chartData.map(
         (item, index) => {
-
           const x =
             (index /
               Math.max(
@@ -423,37 +427,35 @@ export default function Earnings() {
             x,
             y,
           };
-
         }
       );
-
 
     const revenueLine =
       revenuePoints
         .map(
-          (p) => `${p.x},${p.y}`
+          (p) =>
+            `${p.x},${p.y}`
         )
         .join(" ");
-
 
     const purchaseLine =
       purchasePoints
         .map(
-          (p) => `${p.x},${p.y}`
+          (p) =>
+            `${p.x},${p.y}`
         )
         .join(" ");
-
 
     const area = [
       `0,${bottom}`,
 
       ...revenuePoints.map(
-        (p) => `${p.x},${p.y}`
+        (p) =>
+          `${p.x},${p.y}`
       ),
 
       `${width},${bottom}`,
     ].join(" ");
-
 
     return {
       revenuePoints,
@@ -463,16 +465,13 @@ export default function Earnings() {
       area,
       height,
     };
-
   }, [data.chartData]);
-
 
   /* =======================================================
      RENDER
-  ======================================================= */
+     ======================================================= */
 
   return (
-
     <div className="earnings-page">
 
       {/* ===================================================
@@ -506,17 +505,47 @@ export default function Earnings() {
 
         </div>
 
+        {/* =================================================
+            WORKING DATE PICKER
+        ================================================= */}
 
-        <button className="date-filter">
-          <CalendarDays size={16} />
+        <div className="earnings-date-picker-wrapper">
+          <DatePicker
+            selectsRange
+            startDate={startDate}
+            endDate={endDate}
+            onChange={(update) => {
+              setDateRange(update);
+            }}
+            dateFormat="dd MMM yyyy"
+            popperPlacement="bottom-end"
+            popperClassName="earnings-date-popper"
+            customInput={
+              <button
+                type="button"
+                className="date-filter"
+              >
+                <CalendarDays size={16} />
 
-          <span>14 Aug 2026 - 14 Aug 2026</span>
+                <span>
+                  {startDate && endDate
+                    ? `${formatDate(
+                        startDate
+                      )} - ${formatDate(
+                        endDate
+                      )}`
+                    : "Select Date Range"}
+                </span>
 
-          <span className="date-arrow">▾</span>
-        </button>
+                <span className="date-arrow">
+                  ▾
+                </span>
+              </button>
+            }
+          />
+        </div>
 
       </div>
-
 
       {/* ===================================================
           STATS
@@ -525,11 +554,9 @@ export default function Earnings() {
       <section className="earnings-stats">
 
         {data.stats.map((stat) => {
-
           const Icon = stat.icon;
 
           return (
-
             <div
               className="earnings-stat-card"
               key={stat.title}
@@ -540,7 +567,6 @@ export default function Earnings() {
               >
                 <Icon size={23} />
               </div>
-
 
               <div className="earnings-stat-content">
 
@@ -555,7 +581,8 @@ export default function Earnings() {
                 <span
                   className={`earnings-stat-change ${stat.type}`}
                 >
-                  {stat.type === "negative"
+                  {stat.type ===
+                  "negative"
                     ? "↓"
                     : "↑"}{" "}
                   {stat.change}
@@ -564,13 +591,10 @@ export default function Earnings() {
               </div>
 
             </div>
-
           );
-
         })}
 
       </section>
-
 
       {/* ===================================================
           REVENUE OVERVIEW + BREAKDOWN
@@ -602,20 +626,22 @@ export default function Earnings() {
 
                 </div>
 
-                
-
               </div>
+
               <div className="revenue-summary">
 
                 <div>
                   <strong>
                     {data.totalRevenue}
                   </strong>
+
                   <span>
                     Total Revenue
                   </span>
+
                   <small>
-                    ↑ {data.revenueGrowth}
+                    ↑{" "}
+                    {data.revenueGrowth}
                   </small>
                 </div>
 
@@ -623,176 +649,231 @@ export default function Earnings() {
                   <strong>
                     {data.totalPurchases}
                   </strong>
+
                   <span>
                     Total Purchases
                   </span>
+
                   <small>
-                    ↑ {data.purchasesGrowth}
+                    ↑{" "}
+                    {data.purchasesGrowth}
                   </small>
                 </div>
-<div className="chart-toolbar">
 
-                <div className="chart-filters">
+                <div className="chart-toolbar">
 
-                  {[
-                    "7D",
-                    "30D",
-                    "6M",
-                    "12M",
-                    "This Year",
-                  ].map((item) => (
+                  <div className="chart-filters">
 
-                    <button
-                      key={item}
-                      type="button"
-                      className={
-                        range === item
-                          ? "active"
-                          : ""
-                      }
-                      onClick={() =>
-                        setRange(item)
-                      }
-                    >
-                      {item}
-                    </button>
+                    {[
+                      "7D",
+                      "30D",
+                      "6M",
+                      "12M",
+                      "This Year",
+                    ].map((item) => (
 
-                  ))}
+                      <button
+                        key={item}
+                        type="button"
+                        className={
+                          range === item
+                            ? "active"
+                            : ""
+                        }
+                        onClick={() =>
+                          setRange(item)
+                        }
+                      >
+                        {item}
+                      </button>
+
+                    ))}
+
+                  </div>
 
                 </div>
 
               </div>
+
+              <div className="chart-legend">
+
+                <span className="legend-line revenue-line" />
+
+                <span>
+                  Revenue (₹)
+                </span>
+
+                <span className="legend-line purchase-line" />
+
+                <span>
+                  Purchases
+                </span>
+
               </div>
-<div className="chart-legend">
-                    <span className="legend-line revenue-line" />
-                    <span>Revenue (₹)</span>
-                    <span className="legend-line purchase-line" />
-                    <span>Purchases</span>
-                  </div>
+
             </div>
 
             <div className="revenue-chart-wrapper">
 
-             
-
               <div className="revenue-chart">
 
                 <div className="chart-y-axis">
+
                   <span>50K</span>
                   <span>40K</span>
                   <span>30K</span>
                   <span>20K</span>
                   <span>10K</span>
                   <span>0</span>
+
                 </div>
- {/* <div className="chart-legend">
-                    <span className="legend-line revenue-line" />
-                    <span>Revenue (₹)</span>
-                    <span className="legend-line purchase-line" />
-                    <span>Purchases</span>
-                  </div> */}
+
                 <div className="chart-area">
 
-                  {/* <div className="chart-legend">
-                    <span className="legend-line revenue-line" />
-                    <span>Revenue (₹)</span>
-                    <span className="legend-line purchase-line" />
-                    <span>Purchases</span>
-                  </div> */}
-
                   <div className="chart-grid">
+
                     {Array.from({
                       length: 6,
-                    }).map((_, index) => (
-                      <span key={index} />
-                    ))}
+                    }).map(
+                      (_, index) => (
+                        <span
+                          key={index}
+                        />
+                      )
+                    )}
+
                   </div>
 
-                 <svg
-  className="chart-svg"
-  viewBox={`0 0 900 ${chart.height}`}
-  preserveAspectRatio="none"
->
-  {/* GREEN REVENUE AREA */}
-  <polyline
-    points={chart.area}
-    fill="#08a66b"
-    fillOpacity="0.10"
-    stroke="none"
-  />
+                  <svg
+                    className="chart-svg"
+                    viewBox={`0 0 900 ${chart.height}`}
+                    preserveAspectRatio="none"
+                  >
 
-  {/* ORANGE PURCHASE AREA */}
-  <polyline
-    points={[
-      `0,220`,
-      ...chart.purchasePoints.map(
-        (point) => `${point.x},${point.y}`
-      ),
-      `900,220`,
-    ].join(" ")}
-    fill="#fff5e6"
-    stroke="none"
-  />
+                    {/* GREEN REVENUE AREA */}
 
-  {/* GREEN REVENUE LINE */}
-  <polyline
-    points={chart.revenueLine}
-    fill="none"
-    stroke="#08a66b"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    vectorEffect="non-scaling-stroke"
-  />
+                    <polyline
+                      points={chart.area}
+                      fill="#08a66b"
+                      fillOpacity="0.10"
+                      stroke="none"
+                    />
 
-  {/* ORANGE PURCHASE LINE */}
-  <polyline
-    points={chart.purchaseLine}
-    fill="none"
-    stroke="#f59e0b"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    vectorEffect="non-scaling-stroke"
-  />
+                    {/* ORANGE PURCHASE AREA */}
 
-  {/* GREEN CIRCLES */}
-  {chart.revenuePoints.map((point, index) => (
-    <circle
-      key={`r-${index}`}
-      cx={point.x}
-      cy={point.y}
-      r="2"
-      fill="#fff"
-      stroke="#08a66b"
-      strokeWidth="1.2"
-      vectorEffect="non-scaling-stroke"
-    />
-  ))}
+                    <polyline
+                      points={[
+                        `0,220`,
+                        ...chart.purchasePoints.map(
+                          (point) =>
+                            `${point.x},${point.y}`
+                        ),
+                        `900,220`,
+                      ].join(" ")}
+                      fill="#fff5e6"
+                      stroke="none"
+                    />
 
-  {/* ORANGE CIRCLES */}
-  {chart.purchasePoints.map((point, index) => (
-    <circle
-      key={`p-${index}`}
-      cx={point.x}
-      cy={point.y}
-      r="2"
-      fill="#fff"
-      stroke="#f59e0b"
-      strokeWidth="1.2"
-      vectorEffect="non-scaling-stroke"
-    />
-  ))}
-</svg>
+                    {/* GREEN REVENUE LINE */}
+
+                    <polyline
+                      points={
+                        chart.revenueLine
+                      }
+                      fill="none"
+                      stroke="#08a66b"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+
+                    {/* ORANGE PURCHASE LINE */}
+
+                    <polyline
+                      points={
+                        chart.purchaseLine
+                      }
+                      fill="none"
+                      stroke="#f59e0b"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+
+                    {/* GREEN CIRCLES */}
+
+                    {chart.revenuePoints.map(
+                      (
+                        point,
+                        index
+                      ) => (
+                        <circle
+                          key={`r-${index}`}
+                          cx={point.x}
+                          cy={point.y}
+                          r="2"
+                          fill="#fff"
+                          stroke="#08a66b"
+                          strokeWidth="1.2"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      )
+                    )}
+
+                    {/* ORANGE CIRCLES */}
+
+                    {chart.purchasePoints.map(
+                      (
+                        point,
+                        index
+                      ) => (
+                        <circle
+                          key={`p-${index}`}
+                          cx={point.x}
+                          cy={point.y}
+                          r="2"
+                          fill="#fff"
+                          stroke="#f59e0b"
+                          strokeWidth="1.2"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      )
+                    )}
+
+                  </svg>
 
                   <div className="chart-x-axis">
-                    <span>15 Jul</span>
-                    <span>20 Jul</span>
-                    <span>25 Jul</span>
-                    <span>30 Jul</span>
-                    <span>4 Aug</span>
-                    <span>9 Aug</span>
-                    <span>14 Aug</span>
+
+                    <span>
+                      15 Jul
+                    </span>
+
+                    <span>
+                      20 Jul
+                    </span>
+
+                    <span>
+                      25 Jul
+                    </span>
+
+                    <span>
+                      30 Jul
+                    </span>
+
+                    <span>
+                      4 Aug
+                    </span>
+
+                    <span>
+                      9 Aug
+                    </span>
+
+                    <span>
+                      14 Aug
+                    </span>
+
                   </div>
 
                 </div>
@@ -802,7 +883,6 @@ export default function Earnings() {
             </div>
 
           </div>
-
 
           {/* =================================================
               REVENUE BREAKDOWN - RIGHT
@@ -821,12 +901,15 @@ export default function Earnings() {
                 <div className="donut-chart">
 
                   <div className="donut-center">
+
                     <strong>
                       {data.totalRevenue}
                     </strong>
+
                     <span>
                       Total
                     </span>
+
                   </div>
 
                 </div>
@@ -837,18 +920,22 @@ export default function Earnings() {
 
                 {data.breakdown.map(
                   (item) => (
+
                     <div
                       className="breakdown-item"
                       key={item.label}
                     >
 
                       <div className="breakdown-label">
+
                         <span
                           className={`legend ${item.dotClass}`}
                         />
+
                         <span>
                           {item.label}
                         </span>
+
                       </div>
 
                       <strong>
@@ -860,6 +947,7 @@ export default function Earnings() {
                       </span>
 
                     </div>
+
                   )
                 )}
 
@@ -873,14 +961,15 @@ export default function Earnings() {
 
       </section>
 
-
       {/* ===================================================
           BOTTOM TWO PANELS
       =================================================== */}
 
       <div className="earnings-bottom-grid">
 
-        {/* MONTHLY SUMMARY */}
+        {/* =================================================
+            MONTHLY SUMMARY
+        ================================================= */}
 
         <section className="earnings-panel">
 
@@ -891,7 +980,6 @@ export default function Earnings() {
             </h2>
 
           </div>
-
 
           <div className="earnings-table-wrapper">
 
@@ -928,7 +1016,6 @@ export default function Earnings() {
                 </tr>
 
               </thead>
-
 
               <tbody>
 
@@ -974,7 +1061,6 @@ export default function Earnings() {
 
           </div>
 
-
           <button
             className="view-report-button"
             type="button"
@@ -985,8 +1071,9 @@ export default function Earnings() {
 
         </section>
 
-
-        {/* RECENT TRANSACTIONS */}
+        {/* =================================================
+            RECENT TRANSACTIONS
+        ================================================= */}
 
         <section className="earnings-panel">
 
@@ -1004,7 +1091,6 @@ export default function Earnings() {
             </button>
 
           </div>
-
 
           <div className="earnings-table-wrapper">
 
@@ -1042,14 +1128,15 @@ export default function Earnings() {
 
               </thead>
 
-
               <tbody>
 
                 {data.transactions.map(
                   (transaction) => (
 
                     <tr
-                      key={transaction.id}
+                      key={
+                        transaction.id
+                      }
                     >
 
                       <td>
@@ -1097,7 +1184,6 @@ export default function Earnings() {
 
       </div>
 
-
       {/* ===================================================
           FOOTER INFO
       =================================================== */}
@@ -1107,13 +1193,12 @@ export default function Earnings() {
         <CreditCard size={15} />
 
         <span>
-          All amounts are in Indian Rupees (₹)
-          and include applicable taxes.
+          All amounts are in Indian Rupees
+          (₹) and include applicable taxes.
         </span>
 
       </div>
 
     </div>
-
   );
 }

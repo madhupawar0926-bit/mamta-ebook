@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const chartData = [
   { month: "Jan", revenue: 50, purchases: 40 },
   { month: "Feb", revenue: 63, purchases: 82 },
@@ -15,6 +17,12 @@ const chartData = [
 
 export function RevenueChart() {
   const maxValue = 100;
+
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+
+  const selectedData = chartData.find(
+    (item) => item.month === selectedMonth
+  );
 
   return (
     <section className="dashboard-panel revenue-panel">
@@ -39,10 +47,17 @@ export function RevenueChart() {
         </div>
 
         <div className="chart-controls">
-          <button className="year-select">This Year </button>
+          <button className="year-select">
+            This Year
+          </button>
 
-          <button className="chart-nav muted">←</button>
-          <button className="chart-nav active">→</button>
+          <button className="chart-nav muted">
+            ←
+          </button>
+
+          <button className="chart-nav active">
+            →
+          </button>
         </div>
       </div>
 
@@ -57,6 +72,7 @@ export function RevenueChart() {
         </div>
 
         <div className="chart-content">
+
           <div className="chart-grid-lines">
             <span />
             <span />
@@ -66,41 +82,100 @@ export function RevenueChart() {
             <span />
           </div>
 
-          <div className="bars">
-            {chartData.map((item) => (
-              <div className="bar-group" key={item.month}>
-                <div className="bar-pair">
-                  <div
-                    className="bar revenue-bar"
-                    style={{
-                      height: `${(item.revenue / maxValue) * 100}%`,
-                    }}
-                  />
+          {/* SELECTED VALUE TOOLTIP */}
 
-                  <div
-                    className="bar purchase-bar"
-                    style={{
-                      height: `${(item.purchases / maxValue) * 100}%`,
-                    }}
-                  />
-                </div>
-
-                <span className="month-label">{item.month}</span>
+          {selectedData && (
+            <div className="chart-value-tooltip">
+              <div className="tooltip-month">
+                {selectedData.month}
               </div>
-            ))}
+
+              <div className="tooltip-value revenue-value">
+                <span className="tooltip-dot revenue-dot" />
+                <span>Revenue</span>
+                <strong>₹{selectedData.revenue}K</strong>
+              </div>
+
+              <div className="tooltip-value purchase-value">
+                <span className="tooltip-dot purchase-dot" />
+                <span>Purchases</span>
+                <strong>{selectedData.purchases}</strong>
+              </div>
+            </div>
+          )}
+
+          <div className="bars">
+            {chartData.map((item) => {
+              const isSelected =
+                selectedMonth === item.month;
+
+              return (
+                <div
+                  className={`bar-group ${
+                    isSelected ? "selected" : ""
+                  }`}
+                  key={item.month}
+                  onClick={() => {
+                    setSelectedMonth(
+                      isSelected ? null : item.month
+                    );
+                  }}
+                >
+                  <div className="bar-pair">
+
+                    {/* REVENUE BAR */}
+
+                    <div
+                      className="bar revenue-bar"
+                      style={{
+                        height: `${
+                          (item.revenue / maxValue) * 100
+                        }%`,
+                      }}
+                    />
+
+                    {/* PURCHASE BAR */}
+
+                    <div
+                      className="bar purchase-bar"
+                      style={{
+                        height: `${
+                          (item.purchases / maxValue) * 100
+                        }%`,
+                      }}
+                    />
+
+                  </div>
+
+                  <span className="month-label">
+                    {item.month}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
       <div className="chart-summary">
         <div>
-          <span>Total Revenue (This Year)</span>
-          <strong>₹4,85,000</strong>
+          <span>
+            Total Revenue (This Year)
+          </span>
+
+          <strong>
+            ₹4,85,000
+          </strong>
         </div>
 
         <div>
-          <span>Total Purchases (This Year)</span>
-          <strong>5,420</strong>
+          <span>
+            Total Purchases (This Year)
+          </span>
+
+          <strong>
+            5,420
+          </strong>
         </div>
       </div>
     </section>

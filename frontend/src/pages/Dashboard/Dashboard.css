@@ -1046,3 +1046,301 @@ font-weight: 600;
 .quick-action-arrow {
   transition: transform 0.2s ease;
 }
+.dashboard-top {
+  position: relative;
+  overflow: visible !important;
+}
+
+.date-picker-wrapper {
+  position: relative;
+  z-index: 1000;
+}
+
+.dashboard-date-popper {
+  z-index: 99999 !important;
+}
+/* revenue dabird */
+/* =========================================================
+   CLICKABLE BAR
+   ========================================================= */
+
+.bar-group {
+  position: relative;
+  cursor: pointer;
+}
+
+.bar-group:hover .bar {
+  opacity: 0.8;
+}
+
+.bar-group.selected .bar {
+  opacity: 1;
+}
+
+.bar-group.selected {
+  z-index: 20;
+}
+
+
+/* =========================================================
+   CHART VALUE TOOLTIP
+   ========================================================= */
+
+.chart-content {
+  position: relative;
+}
+
+.chart-value-tooltip {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  min-width: 150px;
+  padding: 12px 14px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+
+  z-index: 100;
+}
+
+.tooltip-month {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+
+  border-bottom: 1px solid #edf0f3;
+}
+
+.tooltip-value {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  font-size: 12px;
+  color: #64748b;
+
+  margin-top: 6px;
+}
+
+.tooltip-value strong {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.tooltip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.revenue-dot {
+  background: #f59e0b;
+}
+
+.purchase-dot {
+  background: #10b981;
+}
+
+
+/* =========================================================
+   SELECTED MONTH
+   ========================================================= */
+
+.bar-group.selected .month-label {
+  font-weight: 600;
+}
+/* =========================================================
+   CLICKABLE GRAPH BARS
+   ========================================================= */
+
+.bar-group {
+  position: relative;
+  cursor: pointer;
+  outline: none;
+}
+
+.bar-group:hover .bar {
+  opacity: 0.85;
+}
+
+.bar-group.selected {
+  z-index: 100;
+}
+
+.bar-group.selected .bar {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   GRAPH VALUE TOOLTIP
+   ========================================================= */
+
+.chart-value-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+
+  transform: translateX(-50%);
+
+  min-width: 0px;
+
+  padding: 0px;
+
+  background: #ffffff;
+
+  border: none;
+
+  border-radius: 8px;
+
+  
+
+  z-index: 0;
+
+  pointer-events: none;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   TOOLTIP MONTH
+   ========================================================= */
+
+.tooltip-month {
+  margin: 0 0 8px;
+  padding: 0 0 7px;
+display: none;
+  border-bottom: 1px solid #edf0f2;
+
+  color: #101828;
+
+  font-size: 11px;
+  line-height: 1.2;
+
+  font-weight: 600;
+
+  text-align: left;
+}
+
+
+/* =========================================================
+   TOOLTIP ROW
+   ========================================================= */
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-top: 6px;
+
+  color: #667085;
+
+  font-size: 11px;
+
+  line-height: 1.2;
+}
+
+.tooltip-row strong {
+  margin-left: auto;
+
+  color: #101828;
+
+  font-size: 11px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   TOOLTIP DOTS
+   ========================================================= */
+
+.tooltip-dot {
+  width: 7px;
+  height: 7px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+}
+
+.revenue-dot {
+  background: #f79009;
+}
+
+.purchase-dot {
+  background: #12b76a;
+}
+
+
+/* =========================================================
+   PREVENT LAYOUT SHIFT
+   ========================================================= */
+
+.chart-area,
+.chart-wrapper,
+.revenue-card,
+.bars {
+  overflow: visible !important;
+}
+
+
+/* =========================================================
+   KEYBOARD FOCUS
+   ========================================================= */
+
+.bar-group:focus-visible {
+  outline: 2px solid #08a66b;
+  outline-offset: 3px;
+}
+
+
+/* =========================================================
+   DATE PICKER
+   ========================================================= */
+
+.dashboard-top {
+  position: relative;
+  overflow: visible !important;
+}
+
+.date-picker-wrapper {
+  position: relative;
+  z-index: 1000;
+}
+
+.dashboard-date-popper {
+  z-index: 99999 !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 520px) {
+  .chart-value-tooltip {
+    min-width: 135px;
+    padding: 8px 10px;
+  }
+
+  .tooltip-month,
+  .tooltip-row,
+  .tooltip-row strong {
+    font-size: 10px;
+  }
+}

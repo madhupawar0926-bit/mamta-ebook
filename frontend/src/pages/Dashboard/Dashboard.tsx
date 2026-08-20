@@ -3,17 +3,20 @@ import {
   Users,
   ShoppingCart,
   IndianRupee,
-  FileText,
-  FolderPlus,
-  Bell,
-  ArrowRight,
+  
   TrendingUp,
   TrendingDown,
   CalendarDays,
 } from "lucide-react";
 
 import { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import "./Dashboard.css";
+
+/* =========================================================
+   STATS
+   ========================================================= */
 
 const stats = [
   {
@@ -52,15 +55,6 @@ const stats = [
     icon: IndianRupee,
     type: "green",
   },
-  // {
-  //   title: "Failed Payments",
-  //   value: "12",
-  //   change: "3 vs last month",
-  //   positive: false,
-  //   footer: "This Month",
-  //   icon: FileText,
-  //   type: "blue",
-  // },
 ];
 
 /* =========================================================
@@ -102,6 +96,10 @@ const chartDataByPeriod = {
   ],
 };
 
+/* =========================================================
+   CHART SUMMARY
+   ========================================================= */
+
 const chartSummary = {
   Weekly: {
     revenue: "₹45,800",
@@ -118,6 +116,10 @@ const chartSummary = {
     purchases: "61,840",
   },
 };
+
+/* =========================================================
+   TOP BOOKS
+   ========================================================= */
 
 const topBooks = [
   {
@@ -146,97 +148,206 @@ const topBooks = [
   },
 ];
 
-const quickActions = [
-  {
-    title: "Add New Book",
-    description: "Upload a new ebook",
-    icon: BookOpen,
-  },
-  {
-    title: "Add Folder",
-    description: "Create new category",
-    icon: FolderPlus,
-  },
-  {
-    title: "Send Notification",
-    description: "Notify all users",
-    icon: Bell,
-  },
-  {
-    title: "View Transactions",
-    description: "See all orders",
-    icon: FileText,
-  },
-];
+/* =========================================================
+   QUICK ACTIONS
+   ========================================================= */
+
+// const quickActions = [
+//   {
+//     title: "Add New Book",
+//     description: "Upload a new ebook",
+//     icon: BookOpen,
+//   },
+//   {
+//     title: "Add Folder",
+//     description: "Create new category",
+//     icon: FolderPlus,
+//   },
+//   {
+//     title: "Send Notification",
+//     description: "Notify all users",
+//     icon: Bell,
+//   },
+//   {
+//     title: "View Transactions",
+//     description: "See all orders",
+//     icon: FileText,
+//   },
+// ];
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
 
 export function Dashboard() {
   const [chartPeriod, setChartPeriod] =
     useState<keyof typeof chartDataByPeriod>("Monthly");
 
-  const activeChartData = chartDataByPeriod[chartPeriod];
-  const activeSummary = chartSummary[chartPeriod];
+  /* =========================================================
+     SELECTED GRAPH BAR
+     ========================================================= */
+
+  const [selectedChartMonth, setSelectedChartMonth] =
+    useState<string | null>(null);
+
+  /* =========================================================
+     DATE RANGE
+     ========================================================= */
+
+  const [dateRange, setDateRange] = useState<
+    [Date | null, Date | null]
+  >([
+    new Date(2026, 7, 14),
+    new Date(2026, 7, 14),
+  ]);
+
+  const [startDate, endDate] = dateRange;
+
+  const activeChartData =
+    chartDataByPeriod[chartPeriod];
+
+  const activeSummary =
+    chartSummary[chartPeriod];
+
+  /* =========================================================
+     DATE FORMATTER
+     ========================================================= */
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return "";
+
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  /* =========================================================
+     HANDLE CHART BAR CLICK
+     ========================================================= */
+
+  const handleChartBarClick = (month: string) => {
+    setSelectedChartMonth((current) =>
+      current === month ? null : month
+    );
+  };
 
   return (
     <div className="dashboard-page">
 
       {/* =====================================================
-          WELCOME
+          TOP HEADER
       ===================================================== */}
 
       <div className="dashboard-top">
+
         <div>
           <p className="dashboard-welcome">
-            Welcome back, <strong>Admin User!</strong> Here's what's happening
-            with your platform today.
+            Welcome back, <strong>Admin User!</strong>{" "}
+            Here's what's happening with your platform
+            today.
           </p>
         </div>
 
-        <button className="date-filter">
-          <CalendarDays size={16} />
+        {/* =================================================
+            DATE PICKER
+        ================================================= */}
 
-          <span>14 Aug 2026 - 14 Aug 2026</span>
+        <div className="date-picker-wrapper">
+          <DatePicker
+            selectsRange
+            startDate={startDate}
+            endDate={endDate}
+            onChange={(update) => {
+              setDateRange(update);
+            }}
+            dateFormat="dd MMM yyyy"
+            popperPlacement="bottom-end"
+            popperClassName="dashboard-date-popper"
+            customInput={
+              <button
+                type="button"
+                className="date-filter"
+              >
+                <CalendarDays size={16} />
 
-          <span className="date-arrow">▾</span>
-        </button>
+                <span>
+                  {startDate && endDate
+                    ? `${formatDate(
+                        startDate
+                      )} - ${formatDate(endDate)}`
+                    : "Select Date Range"}
+                </span>
+
+                <span className="date-arrow">
+                  ▾
+                </span>
+              </button>
+            }
+          />
+        </div>
       </div>
 
       {/* =====================================================
-          STAT CARDS
+          STATS
       ===================================================== */}
 
       <section className="stats-grid">
+
         {stats.map((stat) => {
           const Icon = stat.icon;
 
           return (
-            <div className="stat-card" key={stat.title}>
+            <div
+              className="stat-card"
+              key={stat.title}
+            >
+
               <div className="stat-main">
-                <div className={`stat-icon ${stat.type}`}>
+
+                <div
+                  className={`stat-icon ${stat.type}`}
+                >
                   <Icon size={25} />
                 </div>
 
                 <div className="stat-content">
-                  <p className="stat-title">{stat.title}</p>
 
-                  <h2>{stat.value}</h2>
+                  <p className="stat-title">
+                    {stat.title}
+                  </p>
+
+                  <h2>
+                    {stat.value}
+                  </h2>
 
                   <div
                     className={`stat-change ${
-                      stat.positive ? "positive" : "negative"
+                      stat.positive
+                        ? "positive"
+                        : "negative"
                     }`}
                   >
+
                     {stat.positive ? (
                       <TrendingUp size={13} />
                     ) : (
                       <TrendingDown size={13} />
                     )}
 
-                    <span>{stat.change}</span>
+                    <span>
+                      {stat.change}
+                    </span>
+
                   </div>
+
                 </div>
+
               </div>
 
               <div className="stat-footer">
+
                 <span
                   className={
                     stat.positive
@@ -245,11 +356,16 @@ export function Dashboard() {
                   }
                 />
 
-                <span>{stat.footer}</span>
+                <span>
+                  {stat.footer}
+                </span>
+
               </div>
+
             </div>
           );
         })}
+
       </section>
 
       {/* =====================================================
@@ -259,15 +375,21 @@ export function Dashboard() {
       <section className="dashboard-grid">
 
         {/* =================================================
-            REVENUE CHART
+            REVENUE VS PURCHASES
         ================================================= */}
 
         <div className="revenue-card">
+
           <div className="section-header">
+
             <div>
-              <h3>Revenue vs Purchases</h3>
+
+              <h3>
+                Revenue vs Purchases
+              </h3>
 
               <div className="chart-legend">
+
                 <span>
                   <i className="legend-box revenue" />
                   Revenue (₹)
@@ -277,34 +399,61 @@ export function Dashboard() {
                   <i className="legend-box purchase" />
                   Purchases
                 </span>
+
               </div>
+
             </div>
+
+            {/* =================================================
+                CHART CONTROLS
+            ================================================= */}
 
             <div className="chart-controls">
 
-              {/* PERIOD SELECTOR */}
               <select
                 className="year-select"
                 value={chartPeriod}
-                onChange={(e) =>
+                onChange={(e) => {
+
                   setChartPeriod(
                     e.target.value as keyof typeof chartDataByPeriod
-                  )
-                }
+                  );
+
+                  setSelectedChartMonth(null);
+
+                }}
               >
-                <option value="Weekly">Weekly</option>
-                <option value="Monthly">Monthly</option>
-                <option value="Yearly">Yearly</option>
+
+                <option value="Weekly">
+                  Weekly
+                </option>
+
+                <option value="Monthly">
+                  Monthly
+                </option>
+
+                <option value="Yearly">
+                  Yearly
+                </option>
+
               </select>
 
-              <button className="chart-arrow disabled">
+              <button
+                type="button"
+                className="chart-arrow disabled"
+              >
                 ←
               </button>
 
-              <button className="chart-arrow active">
+              <button
+                type="button"
+                className="chart-arrow active"
+              >
                 →
               </button>
+
             </div>
+
           </div>
 
           {/* =================================================
@@ -312,56 +461,167 @@ export function Dashboard() {
           ================================================= */}
 
           <div className="chart-wrapper">
+
             <div className="chart-y-axis">
+
               <span>100K</span>
               <span>80K</span>
               <span>60K</span>
               <span>40K</span>
               <span>20K</span>
               <span>0</span>
+
             </div>
 
             <div className="chart-area">
+
+              {/* =================================================
+                  GRID LINES
+              ================================================= */}
+
               <div className="chart-grid-lines">
+
                 <span />
                 <span />
                 <span />
                 <span />
                 <span />
                 <span />
+                <span />
+
               </div>
 
+              {/* =================================================
+                  BARS
+              ================================================= */}
+
               <div className="bars">
-                {activeChartData.map((item) => (
-                  <div
-                    className="chart-column"
-                    key={item.month}
-                  >
-                    <div className="bar-group">
+
+                {activeChartData.map((item) => {
+
+                  const isSelected =
+                    selectedChartMonth ===
+                    item.month;
+
+                  return (
+
+                    <div
+                      className="chart-column"
+                      key={item.month}
+                    >
 
                       <div
-                        className="bar revenue-bar"
-                        style={{
-                          height: `${item.revenue * 2}px`,
-                        }}
-                      />
+                        className={`bar-group ${
+                          isSelected
+                            ? "selected"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          handleChartBarClick(
+                            item.month
+                          )
+                        }
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(event) => {
 
-                      <div
-                        className="bar purchase-bar"
-                        style={{
-                          height: `${item.purchases * 2}px`,
+                          if (
+                            event.key ===
+                              "Enter" ||
+                            event.key ===
+                              " "
+                          ) {
+                            event.preventDefault();
+
+                            handleChartBarClick(
+                              item.month
+                            );
+                          }
+
                         }}
-                      />
+                      >
+
+                        {/* =====================================
+                            CLICKED VALUE TOOLTIP
+                        ===================================== */}
+
+                        {isSelected && (
+
+                          <div className="chart-value-tooltip">
+
+                            <div className="tooltip-month">
+                              {item.month}
+                            </div>
+
+                            <div className="tooltip-row">
+
+                              <span className="tooltip-dot revenue-dot" />
+
+                              <span>
+                                Revenue
+                              </span>
+
+                              <strong>
+                                ₹{item.revenue}K
+                              </strong>
+
+                            </div>
+
+                            <div className="tooltip-row">
+
+                              <span className="tooltip-dot purchase-dot" />
+
+                              <span>
+                                Purchases
+                              </span>
+
+                              <strong>
+                                {item.purchases}
+                              </strong>
+
+                            </div>
+
+                          </div>
+
+                        )}
+
+                        {/* =====================================
+                            REVENUE BAR
+                        ===================================== */}
+
+                        <div
+                          className="bar revenue-bar"
+                          style={{
+                            height: `${item.revenue * 2}px`,
+                          }}
+                        />
+
+                        {/* =====================================
+                            PURCHASE BAR
+                        ===================================== */}
+
+                        <div
+                          className="bar purchase-bar"
+                          style={{
+                            height: `${item.purchases * 2}px`,
+                          }}
+                        />
+
+                      </div>
+
+                      <span className="month">
+                        {item.month}
+                      </span>
 
                     </div>
 
-                    <span className="month">
-                      {item.month}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
+
               </div>
+
             </div>
+
           </div>
 
           {/* =================================================
@@ -369,7 +629,9 @@ export function Dashboard() {
           ================================================= */}
 
           <div className="chart-summary">
+
             <div>
+
               <span>
                 Total Revenue ({chartPeriod})
               </span>
@@ -377,9 +639,11 @@ export function Dashboard() {
               <strong>
                 {activeSummary.revenue}
               </strong>
+
             </div>
 
             <div>
+
               <span>
                 Total Purchases ({chartPeriod})
               </span>
@@ -387,8 +651,11 @@ export function Dashboard() {
               <strong>
                 {activeSummary.purchases}
               </strong>
+
             </div>
+
           </div>
+
         </div>
 
         {/* =================================================
@@ -396,41 +663,62 @@ export function Dashboard() {
         ================================================= */}
 
         <div className="top-books-card">
+
           <div className="section-title-row">
+
             <h3>
-              Top Selling Books <span>(This Month)</span>
+              Top Selling Books{" "}
+              <span>
+                (This Month)
+              </span>
             </h3>
 
-            <button className="view-all">
-              View All
-            </button>
           </div>
 
           <div className="books-heading">
-            <span>Book</span>
 
-            <span>Purchases</span>
+            <span>
+              Book
+            </span>
 
-            <span>Revenue</span>
+            <span>
+              Purchases
+            </span>
+
+            <span>
+              Revenue
+            </span>
+
           </div>
 
           <div className="books-list">
+
             {topBooks.map((book) => (
+
               <div
                 className="book-row"
                 key={book.title}
               >
+
                 <div className="book-info">
+
                   <img
                     src={book.cover}
                     alt={book.title}
                   />
 
                   <div>
-                    <strong>{book.title}</strong>
 
-                    <span>{book.author}</span>
+                    <strong>
+                      {book.title}
+                    </strong>
+
+                    <span>
+                      {book.author}
+                    </span>
+
                   </div>
+
                 </div>
 
                 <span className="book-purchases">
@@ -440,48 +728,70 @@ export function Dashboard() {
                 <span className="book-revenue">
                   {book.revenue}
                 </span>
+
               </div>
+
             ))}
+
           </div>
+
         </div>
+
       </section>
 
       {/* =====================================================
           QUICK ACTIONS
       ===================================================== */}
 
+      {/*
+
       <section className="quick-actions-card">
-        <h3>Quick Actions</h3>
+
+        <h3>
+          Quick Actions
+        </h3>
 
         <div className="quick-actions-grid">
+
           {quickActions.map((action) => {
+
             const Icon = action.icon;
 
             return (
+
               <button
                 type="button"
                 className="quick-action"
                 key={action.title}
               >
+
                 <div className="quick-action-icon">
                   <Icon size={38} />
                 </div>
 
                 <div className="quick-action-content">
-                  <strong>{action.title}</strong>
 
-                  <span>{action.description}</span>
+                  <strong>
+                    {action.title}
+                  </strong>
+
+                  <span>
+                    {action.description}
+                  </span>
+
                 </div>
 
-                <ArrowRight
-                  className="quick-action-arrow"
-                  size={18}
-                />
               </button>
+
             );
+
           })}
+
         </div>
+
       </section>
+
+      */}
 
     </div>
   );
