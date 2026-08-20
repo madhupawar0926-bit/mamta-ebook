@@ -1,0 +1,209 @@
+.app-header {
+  height: 72px;
+
+  width: 100%;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e6ece9;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 24px;
+
+  position: sticky;
+  top: 0;
+
+  z-index: 100;
+}
+
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.header-left h1 {
+  margin: 0;
+
+  font-size: 24px;
+  font-weight: 600;
+
+  color: #111827;
+}
+
+
+.mobile-menu-button {
+  display: none;
+
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
+
+  color: #475569;
+
+  padding: 4px;
+}
+
+
+.header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+}
+
+
+.header-search {
+  width: 380px;
+  height: 36px;
+
+  border: 1px solid #dce4e1;
+
+  border-radius: 9px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 0 14px;
+
+  color: #64748b;
+}
+
+.header-search input {
+  border: none;
+  outline: none;
+
+  width: 100%;
+
+  font-size: 13px;
+}
+
+.header-search input::placeholder {
+  color: #94a3b8;
+}
+
+
+.notification-button {
+  position: relative;
+
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
+
+  color: #475569;
+}
+
+
+.notification-badge {
+  position: absolute;
+
+  top: -6px;
+  right: -7px;
+
+  width: 17px;
+  height: 17px;
+
+  border-radius: 50%;
+
+  background: #ef4444;
+
+  color: white;
+
+  font-size: 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.header-user {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+.header-avatar {
+  width: 40px;
+  height: 40px;
+
+  border-radius: 50%;
+
+  background: #e7f8f1;
+
+  color: #00815e;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.header-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-user-info strong {
+  font-size: 12px;
+}
+
+.header-user-info span {
+  font-size: 9px;
+  color: #94a3b8;
+
+  margin-top: 2px;
+}
+
+
+/* TABLET */
+@media (max-width: 900px) {
+
+  .header-search {
+    width: 280px;
+  }
+
+}
+
+
+/* MOBILE */
+@media (max-width: 700px) {
+
+  .app-header {
+    height: 64px;
+
+    padding: 0 14px;
+  }
+
+  .mobile-menu-button {
+    display: flex;
+  }
+
+  .header-left {
+    gap: 10px;
+  }
+
+  .header-left h1 {
+    font-size: 19px;
+  }
+
+  .header-search {
+    display: none;
+  }
+
+  .header-user-info {
+    display: none;
+  }
+
+}

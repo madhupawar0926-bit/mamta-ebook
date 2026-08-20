@@ -1,50 +1,34 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
+
+import Sidebar from "./Sidebar"
 import Header from "./Header";
-import Sidebar from "./Sidebar";
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
+import "./Layout.css";
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden bg-[#fafcfb]">
+    <div className="app-layout">
 
-      {/* Sidebar */}
       <Sidebar
         mobileOpen={mobileOpen}
-        setMobileOpen={setMobileOpen}
+        onClose={() => setMobileOpen(false)}
       />
 
-      {/* Header */}
-      <Header
-        setMobileOpen={setMobileOpen}
-      />
+      <div className="app-main">
 
-      {/* Content */}
-      <main
-        style={{
-          marginLeft: "178px",
-          width: "calc(100% - 178px)",
-          paddingTop: "40px",
-        }}
-        className="
-          ml-[178px]
-          w-[calc(100%-178px)]
-          pt-[40px]
-          max-[900px]:ml-0
-          max-[900px]:w-full
-        "
-      >
-        <div className="w-full min-w-0">
-          {children}
-        </div>
-      </main>
+        <Header
+          onMenuClick={() => setMobileOpen(true)}
+        />
+
+        <main className="page-content">
+          <Outlet />
+        </main>
+
+      </div>
 
     </div>
   );
-};
-
-export default Layout;
+}

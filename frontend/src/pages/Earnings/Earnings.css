@@ -1,0 +1,1422 @@
+/* =========================================================
+   EARNINGS PAGE
+========================================================= */
+
+.earnings-page {
+  width: 100%;
+  min-width: 0;
+  padding: 0 0 24px;
+  color: #14213d;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.earnings-page *,
+.earnings-page *::before,
+.earnings-page *::after {
+  box-sizing: border-box;
+}
+
+.earnings-page button {
+  font-family: inherit;
+}
+
+
+/* =========================================================
+   TOP ROW
+========================================================= */
+
+.earnings-top-row {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 17px;
+}
+
+.earnings-tabs {
+  height: 54px;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  border-bottom: 1px solid #e6ebef;
+}
+
+.earnings-tab {
+  height: 54px;
+  padding: 0 2px;
+  position: relative;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.earnings-tab.active {
+  color: #009b63;
+  font-weight: 600;
+}
+
+.earnings-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: #009b63;
+}
+
+.date-button {
+  height: 39px;
+  min-width: 205px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  border: 1px solid #dfe5e9;
+  border-radius: 7px;
+  background: #fff;
+  color: #27364d;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.earnings-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.earnings-stat-card {
+  min-width: 0;
+  min-height: 108px;
+  padding: 17px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid #e5eaee;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.earnings-stat-icon {
+  width: 49px;
+  height: 49px;
+  flex: 0 0 49px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.earnings-stat-icon.green {
+  color: #009b63;
+  background: #e9f8f0;
+}
+
+.earnings-stat-icon.blue {
+  color: #3182ce;
+  background: #edf5ff;
+}
+
+.earnings-stat-icon.orange {
+  color: #f59e0b;
+  background: #fff5e6;
+}
+
+.earnings-stat-icon.red {
+  color: #ef4444;
+  background: #fff0f0;
+}
+
+.earnings-stat-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.earnings-stat-title {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.earnings-stat-value {
+  color: #14213d;
+  font-size: 24px;
+  line-height: 1.15;
+  font-weight: 600;
+}
+
+.earnings-stat-change {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.earnings-stat-change.positive {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.earnings-stat-change.warning {
+  color: #f97316;
+  font-weight: 600;
+}
+
+.earnings-stat-change.negative {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   REVENUE SECTION
+========================================================= */
+
+.revenue-section {
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #e5eaee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.revenue-header {
+  margin-bottom: 12px;
+}
+
+.revenue-title-row {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.revenue-section h2 {
+  margin: 0;
+  color: #17233c;
+  font-size: 17px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.info-icon {
+  width: 15px;
+  height: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  border: 1px solid #94a3b8;
+  border-radius: 50%;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.download-report-button {
+  height: 31px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  border: 1px solid #dfe5e9;
+  border-radius: 6px;
+  background: #fff;
+  color: #27364d;
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.download-report-button:hover {
+  background: #f8faf9;
+  border-color: #cbd5d1;
+  color: #006b4f;
+}
+
+
+/* =========================================================
+   REVENUE SUMMARY
+========================================================= */
+
+.revenue-summary {
+  display: flex;
+  gap: 70px;
+  margin-top: 15px;
+}
+
+.revenue-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.revenue-summary strong {
+  color: #17233c;
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+.revenue-summary span {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.revenue-summary small {
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   GRAPH + BREAKDOWN
+========================================================= */
+
+.revenue-body {
+  width: 100%;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2fr)
+    minmax(330px, 1fr);
+  gap: 18px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.revenue-chart-wrapper {
+  min-width: 0;
+}
+
+
+/* =========================================================
+   CHART TOOLBAR
+========================================================= */
+
+.chart-toolbar {
+  height: 31px;
+  margin-left: 173px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  margin-bottom: 3px;
+}
+
+.chart-filters {
+  height: 31px;
+  display: flex;
+  width: fit-content;
+  border: 1px solid #e1e6ea;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.chart-filters button {
+  height: 30px;
+  font-weight: 600;
+  padding: 0 11px;
+  border: 0;
+  border-right: 1px solid #e1e6ea;
+  background: #fff;
+  color: #475569;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.chart-filters button:last-child {
+  border-right: 0;
+}
+
+.chart-filters button:hover {
+  background: #f7faf8;
+  color: #009b63;
+}
+
+.chart-filters button.active {
+  color: #009b63;
+  background: #eaf8f1;
+}
+
+
+/* =========================================================
+   REVENUE CHART
+========================================================= */
+
+.revenue-chart {
+  width: 100%;
+  height: 242px;
+  display: flex;
+  min-width: 0;
+}
+
+.chart-y-axis {
+  width: 43px;
+  padding: 3px 7px 27px 0;
+  flex: 0 0 43px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #94a3b8;
+  font-size: 10px;
+  text-align: right;
+}
+
+.chart-area {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chart-grid {
+  position: absolute;
+  inset: 23px 0 28px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.chart-grid span {
+  width: 100%;
+  border-top: 1px dashed #e5e9ed;
+}
+
+
+/* =========================================================
+   CHART SVG
+========================================================= */
+
+.chart-svg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 23px;
+  width: 100%;
+  height: 209px;
+  overflow: visible;
+}
+
+
+/* =========================================================
+   CHART LEGEND
+========================================================= */
+
+.chart-legend {
+  height: 20px;
+  display: flex;
+  align-items: center;
+      padding-left: 30px;
+
+  gap: 7px;
+  color: #64748b;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.legend-line {
+  width: 15px;
+  height: 5px;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.revenue-line {
+  background: #08a66b;
+}
+
+.purchase-line {
+  margin-left: 5px;
+  background: #f59e0b;
+}
+
+
+/* =========================================================
+   CHART X AXIS
+========================================================= */
+
+.chart-x-axis {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  color: #64748b;
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   REVENUE BREAKDOWN
+========================================================= */
+
+.revenue-breakdown {
+  min-width: 0;
+  padding-left: 18px;
+  border-left: 1px solid #edf0f2;
+}
+
+.revenue-breakdown h2 {
+  margin-bottom: 17px;
+}
+
+.breakdown-content {
+  min-height: 205px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.donut-wrapper {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-chart {
+  width: 170px;
+  height: 170px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: conic-gradient(
+    #08a66b 0% 74.3%,
+    #3182ce 74.3% 88.1%,
+    #8064d9 88.1% 96.2%,
+    #f59e0b 96.2% 100%
+  );
+}
+
+.donut-chart::after {
+  content: "";
+  position: absolute;
+  width: 102px;
+  height: 102px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.donut-center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.donut-center strong {
+  color: #17233c;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.donut-center span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.breakdown-list {
+  min-width: 0;
+  flex: 1;
+}
+
+.breakdown-item {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf0f2;
+}
+
+.breakdown-item:last-child {
+  border-bottom: 0;
+}
+
+.breakdown-label {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  font-size: 11px;
+}
+
+.breakdown-label > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breakdown-item strong {
+  color: #27364d;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.breakdown-item > span:last-child {
+  min-width: 34px;
+  color: #64748b;
+  font-size: 11px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   BREAKDOWN LEGENDS
+========================================================= */
+
+.legend {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 2px;
+}
+
+.green-dot {
+  background: #08a66b;
+}
+
+.blue-dot {
+  background: #3182ce;
+}
+
+.purple-dot {
+  background: #8064d9;
+}
+
+.orange-dot {
+  background: #f59e0b;
+}
+
+
+/* =========================================================
+   BOTTOM PANELS
+========================================================= */
+
+.earnings-bottom-grid {
+  display: grid;
+grid-template-columns: 5.5fr 6.5fr;  /* grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr); */
+  gap: 14px;
+  margin-bottom: 18px;
+  min-width: 0;
+}
+
+.earnings-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e5eaee;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+}
+
+.panel-header {
+  min-height: 55px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: #17233c;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.view-all-button {
+  height: 31px;
+  padding: 0 12px;
+  border: 1px solid #dfe5e9;
+  border-radius: 6px;
+  background: #fff;
+  color: #27364d;
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.view-all-button:hover {
+  background: #f8faf9;
+  border-color: #cbd5d1;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.earnings-table-wrapper {
+  width: 100%;
+  /* overflow-x: auto;
+  overflow-y: hidden; */
+          border:1px solid #e5eaee;
+border-radius:10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.earnings-table {
+  width: 100%;
+  min-width: 540px;
+  border-collapse: collapse;
+}
+
+.earnings-table th {
+  padding: 10px 9px;
+  /* background: #fafcfd; */
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.earnings-table td {
+  padding: 10px 9px;
+  border-top: 1px solid #edf0f2;
+  color: #64748b;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.failed-text {
+  color: #ef4444 !important;
+}
+
+.pending-text {
+  color: #f97316 !important;
+}
+
+
+/* =========================================================
+   PAYMENT STATUS
+========================================================= */
+
+.payment-status {
+  min-width: 48px;
+  padding: 4px 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.payment-status.success {
+  color: #16a34a;
+  background: #eaf8f0;
+  border: 1px solid #bce8cd;
+}
+
+.payment-status.pending {
+  color: #f97316;
+  background: #fff5e9;
+  border: 1px solid #fed7aa;
+}
+
+.payment-status.failed {
+  color: #ef4444;
+  background: #fff0f0;
+  border: 1px solid #fecaca;
+}
+
+
+/* =========================================================
+   VIEW REPORT
+========================================================= */
+
+.view-report-button {
+  margin: 13px auto 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: #009b63;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.view-report-button span {
+  font-size: 16px;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.earnings-info {
+  min-height: 38px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #cceedd;
+  border-radius: 7px;
+  background: #f1fbf6;
+  color: #64748b;
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   DESKTOP REVENUE OVERRIDE
+   KEEP EXISTING DESKTOP DESIGN
+========================================================= */
+
+.revenue-section {
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 0 !important;
+  background: #fff;
+  border: 1px solid #e5eaee;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.revenue-layout {
+  width: 100%;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.65fr)
+    minmax(390px, 1fr);
+  align-items: stretch;
+  min-width: 0;
+}
+
+.revenue-overview-column {
+  min-width: 0;
+  padding: 0 18px 12px;
+      /* height: 409px; */
+
+}
+
+.revenue-overview-column .revenue-header {
+  margin-bottom: 8px;
+}
+
+.revenue-overview-column .revenue-title-row {
+  min-height: 42px;
+}
+
+.revenue-overview-column .revenue-summary {
+  gap: 42px;
+  margin-top: 8px;
+}
+
+.revenue-overview-column .revenue-chart-wrapper {
+  min-width: 0;
+  margin-top: 8px;
+}
+
+.revenue-breakdown {
+  min-width: 0;
+  margin: 49px 10px 10px 0;
+  padding: 18px 16px !important;
+  border: 1px solid #e5eaee !important;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.revenue-breakdown h2 {
+  margin: 0 0 14px !important;
+  font-size: 15px !important;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.revenue-breakdown .breakdown-content {
+  /* min-height: 195px; */
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-top: 25px;
+}
+
+.revenue-breakdown .donut-wrapper {
+  width: 170px;
+  flex: 0 0 170px;
+}
+
+.revenue-breakdown .donut-chart {
+  width: 168px;
+  height: 168px;
+}
+
+.revenue-breakdown .donut-chart::after {
+  width: 96px;
+  height: 96px;
+}
+
+.revenue-breakdown .breakdown-list {
+  min-width: 0;
+  flex: 1;
+}
+
+.revenue-breakdown .breakdown-item {
+  min-height: 43px;
+  padding: 0;
+}
+
+
+/* =========================================================
+   TABLET ONLY
+========================================================= */
+
+@media (max-width: 1200px) and (min-width: 701px) {
+
+  .earnings-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .revenue-layout {
+    grid-template-columns:
+      minmax(0, 1.55fr)
+      minmax(340px, 1fr);
+  }
+
+  .revenue-breakdown {
+    margin-right: 8px;
+    padding: 16px 12px !important;
+  }
+
+  .revenue-breakdown .breakdown-content {
+    gap: 12px;
+  }
+
+  .revenue-breakdown .donut-wrapper {
+    width: 135px;
+    flex-basis: 135px;
+  }
+
+  .revenue-breakdown .donut-chart {
+    width: 135px;
+    height: 135px;
+  }
+
+  .revenue-breakdown .donut-chart::after {
+    width: 82px;
+    height: 82px;
+  }
+
+  .earnings-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   MOBILE ONLY
+   DESKTOP IS NOT AFFECTED
+========================================================= */
+
+@media (max-width: 700px) {
+
+  /* PAGE */
+  .earnings-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    padding-bottom: 20px;
+  }
+
+
+  /* =======================================================
+     TOP ROW
+  ======================================================= */
+
+  .earnings-top-row {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .earnings-tabs {
+    width: 100%;
+    height: 48px;
+    flex: none;
+    gap: 24px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .earnings-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .earnings-tab {
+    height: 48px;
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  .date-button {
+    width: 100%;
+    min-width: 0;
+    height: 40px;
+  }
+
+
+  /* =======================================================
+     STATS
+  ======================================================= */
+
+  .earnings-stats {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .earnings-stat-card {
+    width: 100%;
+    min-height: 92px;
+    padding: 14px;
+  }
+
+  .earnings-stat-icon {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .earnings-stat-value {
+    font-size: 21px;
+  }
+
+  .earnings-stat-title {
+    font-size: 12px;
+  }
+
+  .earnings-stat-change {
+    font-size: 11px;
+  }
+
+
+  /* =======================================================
+     REVENUE SECTION
+  ======================================================= */
+
+  .revenue-section {
+    width: 100%;
+    margin-bottom: 14px;
+    padding: 0 !important;
+  }
+
+  .revenue-layout {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .revenue-overview-column {
+    width: 100%;
+    min-width: 0;
+    padding: 0 14px 14px;
+  }
+
+
+  /* =======================================================
+     REVENUE HEADER
+  ======================================================= */
+
+  .revenue-header {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .revenue-title-row {
+    width: 100%;
+    min-height: 42px;
+    align-items: center;
+  }
+
+  .revenue-section h2 {
+    font-size: 16px;
+  }
+
+
+  /* =======================================================
+     SUMMARY
+  ======================================================= */
+
+  .revenue-summary {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .revenue-summary > div {
+    min-width: 123%;
+  }
+
+  .revenue-summary strong {
+    font-size: 18px;
+  }
+
+  .revenue-summary span,
+  .revenue-summary small {
+    font-size: 11px;
+  }
+
+
+  /* =======================================================
+     CHART TOOLBAR
+  ======================================================= */
+
+  .chart-toolbar {
+    width: 100%;
+    height: auto;
+    margin-left: 0;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+
+  .chart-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chart-filters {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .chart-filters button {
+    padding: 0 9px;
+    font-size: 10px;
+  }
+
+
+  /* =======================================================
+     CHART
+  ======================================================= */
+
+  .revenue-chart-wrapper {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .revenue-chart {
+    width: 100%;
+    height: 220px;
+  }
+
+  .chart-y-axis {
+    width: 36px;
+    flex: 0 0 36px;
+    padding-right: 6px;
+    font-size: 9px;
+  }
+
+  .chart-area {
+    min-width: 0;
+    width: calc(100% - 36px);
+  }
+
+  .chart-svg {
+    width: 100%;
+    height: 178px;
+    top: 23px;
+  }
+
+  .chart-grid {
+    inset: 23px 0 28px 0;
+  }
+
+  .chart-x-axis {
+    font-size: 8px;
+  }
+
+  .chart-legend {
+    gap: 5px;
+    font-size: 9px;
+  }
+
+  .legend-line {
+    width: 12px;
+    height: 4px;
+  }
+
+
+  /* =======================================================
+     BREAKDOWN
+  ======================================================= */
+
+  .revenue-breakdown {
+    width: auto;
+    min-width: 0;
+    margin: 0 14px 14px;
+    padding: 16px 14px !important;
+    border: 1px solid #e5eaee !important;
+    border-radius: 8px;
+  }
+
+  .revenue-breakdown h2 {
+    margin-bottom: 16px !important;
+    font-size: 15px !important;
+  }
+
+  .revenue-breakdown .breakdown-content {
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  .revenue-breakdown .donut-wrapper {
+    width: 100%;
+    flex: none;
+    display: flex;
+    justify-content: center;
+  }
+
+  .revenue-breakdown .donut-chart {
+    width: 150px;
+    height: 150px;
+  }
+
+  .revenue-breakdown .donut-chart::after {
+    width: 90px;
+    height: 90px;
+  }
+
+  .revenue-breakdown .breakdown-list {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .revenue-breakdown .breakdown-item {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 0;
+    gap: 8px;
+  }
+
+
+  /* =======================================================
+     BOTTOM PANELS
+  ======================================================= */
+
+  .earnings-bottom-grid {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .earnings-panel {
+    width: 100%;
+        border:1px solid #e5eaee;
+
+    min-width: 0;
+  }
+
+  .panel-header {
+    min-height: 52px;
+    padding: 0 12px;
+  }
+
+  .panel-header h2 {
+    font-size: 15px;
+  }
+
+
+  /* =======================================================
+     TABLES
+     Only table scrolls horizontally
+  ======================================================= */
+
+  .earnings-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border:1px solid #e5eaee;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .earnings-table {
+    min-width: 620px;
+    width: 620px;
+  }
+
+  .earnings-table th {
+    padding: 9px 8px;
+    font-size: 9px;
+  }
+
+  .earnings-table td {
+    padding: 9px 8px;
+    font-size: 10px;
+  }
+
+
+  /* =======================================================
+     FOOTER
+  ======================================================= */
+
+  .earnings-info {
+    width: 100%;
+    min-height: 38px;
+    padding: 9px 10px;
+    align-items: flex-start;
+    line-height: 1.5;
+    font-size: 10px;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 420px) {
+
+  .earnings-tabs {
+    gap: 18px;
+  }
+
+  .earnings-tab {
+    font-size: 12px;
+  }
+
+  .date-button {
+    font-size: 11px;
+  }
+
+  .earnings-stat-card {
+    min-height: 88px;
+    padding: 12px;
+  }
+
+  .earnings-stat-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .earnings-stat-value {
+    font-size: 20px;
+  }
+
+  .revenue-overview-column {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .revenue-summary {
+    gap: 10px;
+  }
+
+  .revenue-summary strong {
+    font-size: 17px;
+  }
+
+  .chart-filters button {
+    padding: 0 8px;
+    font-size: 9px;
+  }
+
+  .revenue-breakdown {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .revenue-breakdown .donut-chart {
+    width: 140px;
+    height: 140px;
+  }
+
+  .revenue-breakdown .donut-chart::after {
+    width: 84px;
+    height: 84px;
+  }
+
+  .breakdown-label,
+  .breakdown-item strong,
+  .breakdown-item > span:last-child {
+    font-size: 10px;
+  }
+
+  .panel-header {
+    padding: 0 10px;
+  }
+
+  .panel-header h2 {
+    font-size: 14px;
+  }
+}

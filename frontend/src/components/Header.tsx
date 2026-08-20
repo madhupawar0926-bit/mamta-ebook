@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Menu,
   Search,
@@ -6,213 +5,104 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+import { useLocation } from "react-router-dom";
+
+import "./Header.css";
+
 interface HeaderProps {
-  setMobileOpen: (open: boolean) => void;
+  onMenuClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  setMobileOpen,
-}) => {
+function Header({ onMenuClick }: HeaderProps) {
+
+  const location = useLocation();
+
+  const getTitle = () => {
+
+    if (location.pathname === "/") {
+      return "Dashboard";
+    }
+
+    if (location.pathname.startsWith("/books/add")) {
+      return "Add New Book";
+    }
+
+    if (location.pathname.startsWith("/books/folder/add")) {
+      return "Add New Folder";
+    }
+
+    if (location.pathname.startsWith("/books")) {
+      return "Books";
+    }
+
+    if (location.pathname.startsWith("/earnings")) {
+      return "Earnings";
+    }
+
+    return "Dashboard";
+  };
+
   return (
-    <header
-      className="
-        fixed
-        left-[178px]
-        right-0
-        top-0
-        z-30
-        h-[40px]
-        border-b
-        border-[#e5e9e7]
-        bg-white
-        max-[900px]:left-0
-      "
-    >
-      <div className="flex h-full min-w-0 items-center px-[17px]">
-        {/* MENU */}
+    <header className="app-header">
+
+      <div className="header-left">
+
         <button
-          type="button"
-          onClick={() => setMobileOpen(true)}
-          className="
-            flex
-            h-[28px]
-            w-[28px]
-            shrink-0
-            items-center
-            justify-center
-          "
+          className="mobile-menu-button"
+          onClick={onMenuClick}
         >
-          <Menu
-            size={19}
-            strokeWidth={1.8}
-            className="text-[#48555a]"
-          />
+          <Menu size={24} />
         </button>
 
-        {/* TITLE */}
-        <h1
-          className="
-            ml-[12px]
-            shrink-0
-            whitespace-nowrap
-            text-[16px]
-            font-semibold
-            text-[#101418]
-          "
-        >
-          Dashboard
-        </h1>
+        <h1>{getTitle()}</h1>
 
-        {/* RIGHT SIDE */}
-        <div
-          className="ml-auto flex min-w-0 items-center"
-          style={{ marginLeft: "auto" }}
-        >
-          {/* SEARCH */}
-          <div
-            className="
-              flex
-              h-[29px]
-              w-[247px]
-              shrink-0
-              items-center
-              rounded-[7px]
-              border
-              border-[#dce2e1]
-              bg-white
-              max-[1100px]:w-[210px]
-              max-[900px]:w-[200px]
-              max-[700px]:hidden
-            "
-          >
-            <input
-              type="text"
-              placeholder="Search books, users, orders..."
-              className="
-                h-full
-                min-w-0
-                flex-1
-                bg-transparent
-                px-[12px]
-                text-[10px]
-                text-[#273238]
-                outline-none
-                placeholder:text-[#8b959b]
-              "
-            />
-
-            <Search
-              size={16}
-              strokeWidth={1.8}
-              className="mr-[10px] shrink-0 text-[#49565d]"
-            />
-          </div>
-
-          {/* NOTIFICATION */}
-          <button
-            type="button"
-            className="
-              relative
-              ml-[27px]
-              flex
-              h-[38px]
-              w-[30px]
-              shrink-0
-              items-center
-              justify-center
-            "
-          >
-            <Bell
-              size={21}
-              strokeWidth={1.7}
-              className="text-[#46525a]"
-            />
-
-            <span
-              className="
-                absolute
-                right-[-1px]
-                top-[-3px]
-                flex
-                h-[15px]
-                min-w-[15px]
-                items-center
-                justify-center
-                rounded-full
-                bg-[#df242b]
-                px-[3px]
-                text-[9px]
-                font-bold
-                text-white
-              "
-            >
-              6
-            </span>
-          </button>
-
-          {/* AVATAR */}
-          <div
-            className="
-              ml-[18px]
-              flex
-              h-[38px]
-              w-[38px]
-              shrink-0
-              items-center
-              justify-center
-              overflow-hidden
-              rounded-full
-              bg-[#e8f5ec]
-            "
-          >
-            <div className="relative mt-[7px] h-[38px] w-[32px]">
-              <div
-                className="
-                  absolute
-                  left-[6px]
-                  top-0
-                  h-[19px]
-                  w-[19px]
-                  rounded-full
-                  bg-[#f0b48e]
-                "
-              />
-
-              <div
-                className="
-                  absolute
-                  left-[3px]
-                  top-[2px]
-                  h-[13px]
-                  w-[25px]
-                  rounded-t-full
-                  bg-[#282828]
-                "
-              />
-
-              <div
-                className="
-                  absolute
-                  left-[3px]
-                  top-[16px]
-                  h-[22px]
-                  w-[26px]
-                  rounded-t-[14px]
-                  bg-[#16764f]
-                "
-              />
-            </div>
-          </div>
-
-          <ChevronDown
-            size={17}
-            className="ml-[12px] shrink-0 text-[#59656b]"
-            strokeWidth={1.8}
-          />
-        </div>
       </div>
+
+
+      <div className="header-right">
+
+        <div className="header-search">
+
+          <Search size={18} />
+
+          <input
+            type="text"
+            placeholder="Search books, users, orders..."
+          />
+
+        </div>
+
+
+        <button className="notification-button">
+
+          <Bell size={20} />
+
+          <span className="notification-badge">
+            6
+          </span>
+
+        </button>
+
+
+        <div className="header-user">
+
+          <div className="header-avatar">
+            AU
+          </div>
+
+          <div className="header-user-info">
+            <strong>Admin User</strong>
+            <span>Administrator</span>
+          </div>
+
+          <ChevronDown size={16} />
+
+        </div>
+
+      </div>
+
     </header>
   );
-};
+}
 
 export default Header;

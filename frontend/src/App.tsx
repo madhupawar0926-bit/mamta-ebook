@@ -1,27 +1,35 @@
-import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import Layout from "./components/Layout";
+import Layout from "./components/Layout"
+
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Books from "./pages/Books/Books";
+import AddNewBook from "./pages/Books/AddNewBook";
+import AddNewFolder from "./pages/Books/AddNewFolder";
+import Earnings from "./pages/Earnings/Earnings";
 
-const App: React.FC = () => {
+function App() {
   return (
-    <Layout>
-      <Routes>
+    <Routes>
+      <Route element={<Layout />}>
+        
+        {/* Dashboard */}
+        <Route path="/" element={<Dashboard />} />
 
-        <Route
-          path="/"
-          element={<Navigate to="/dashboard" replace />}
-        />
+        {/* Books */}
+        <Route path="/books" element={<Books />} />
+        <Route path="/books/addnewbook" element={<AddNewBook />} />
+        <Route path="/books/folders/new" element={<AddNewFolder />} />
 
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
+        {/* Earnings */}
+        <Route path="/earnings" element={<Earnings />} />
 
-      </Routes>
-    </Layout>
+      </Route>
+
+      {/* Unknown route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
-};
+}
 
 export default App;
