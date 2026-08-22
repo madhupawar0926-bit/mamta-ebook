@@ -27,6 +27,39 @@
   overflow: hidden;
 
   box-sizing: border-box;
+
+  transition: width 0.25s ease;
+}
+
+.sidebar.sidebar-collapsed {
+  width: 60px;
+}
+
+.sidebar-collapse-toggle {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 6px;
+  background: rgba(0, 72, 54, 0.35);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebar-collapse-toggle:hover {
+  background: #08b77a;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.sidebar.sidebar-collapsed .sidebar-collapse-toggle {
+  right: 15px;
 }
 
 
@@ -40,7 +73,7 @@
   display: flex;
   align-items: center;
 
-  padding: 0 13px;
+  padding: 0 13px 0 50px;
 
   gap: 7px;
 
@@ -372,6 +405,33 @@ font-weight: 600;
 }
 
 
+.sidebar.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar.sidebar-collapsed .sidebar-brand {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar.sidebar-collapsed .sidebar-account-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar.sidebar-collapsed .sidebar-user {
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.sidebar.sidebar-collapsed .logout-button {
+  justify-content: center;
+  padding: 0;
+}
+
+
 /* =========================================================
    OVERLAY
 ========================================================= */
@@ -405,6 +465,10 @@ font-weight: 600;
 
   .sidebar.sidebar-mobile-open {
     transform: translateX(0);
+  }
+
+  .sidebar:not(.sidebar-collapsed) .sidebar-collapse-toggle {
+    right: 8px;
   }
 
   .sidebar-overlay {

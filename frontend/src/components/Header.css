@@ -36,6 +36,27 @@
 }
 
 
+.collapse-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e6ece9;
+  border-radius: 7px;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.collapse-toggle-button:hover {
+  background: #f0faf6;
+  color: #008f5b;
+  border-color: #a9d9c3;
+}
+
 .mobile-menu-button {
   display: none;
 

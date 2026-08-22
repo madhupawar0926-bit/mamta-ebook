@@ -8,13 +8,16 @@ import "./Layout.css";
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="app-layout">
+    <div className={`app-layout ${collapsed ? "sidebar-is-collapsed" : ""}`}>
 
       <Sidebar
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
+        collapsed={collapsed}
+        onCollapseToggle={() => setCollapsed((p) => !p)}
       />
 
       <div className="app-main">

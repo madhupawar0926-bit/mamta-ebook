@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   ChevronRight,
@@ -9,6 +9,8 @@ import {
   BookOpen,
   Home,
   MoreVertical,
+  Pencil,
+  Trash2,
   Plus,
   Search,
   SlidersHorizontal,
@@ -19,10 +21,11 @@ import {
 } from "lucide-react";
 
 import {
-  rootFolder,
   type Book,
   type BookFolder,
 } from "./booksData";
+
+import { useBooksContext } from "../../context/BooksContextValue";
 
 import "./Books.css";
 
@@ -96,6 +99,21 @@ function countDirectBooks(
   return folder.books?.length ?? 0;
 }
 
+type FolderType =
+  | "root"
+  | "has-folders"
+  | "has-books"
+  | "empty";
+
+function getFolderType(
+  folder: BookFolder
+): FolderType {
+  if (folder.id === "root") return "root";
+  if ((folder.children?.length ?? 0) > 0) return "has-folders";
+  if ((folder.books?.length ?? 0) > 0) return "has-books";
+  return "empty";
+}
+
 function countAllBooks(
   folder: BookFolder
 ): number {
@@ -119,7 +137,8 @@ type TreeNodeProps = {
   expandedIds: Set<string>;
   onToggle: (id: string) => void;
   onSelect: (id: string) => void;
-  selectedPathIds: Set<string>;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 };
 
 function TreeNode({
@@ -129,7 +148,8 @@ function TreeNode({
   expandedIds,
   onToggle,
   onSelect,
-  selectedPathIds,
+  onEdit,
+  onDelete,
 }: TreeNodeProps) {
   const hasChildren =
     (folder.children?.length ?? 0) > 0;
@@ -221,6 +241,33 @@ function TreeNode({
         <span className="tree-folder-name">
           {folder.name}
         </span>
+
+        {folder.id !== "root" && (
+          <span className="tree-folder-actions">
+            <button
+              type="button"
+              title="Edit folder"
+              aria-label={`Edit ${folder.name}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onEdit(folder.id);
+              }}
+            >
+              <Pencil size={13} />
+            </button>
+            <button
+              type="button"
+              title="Delete folder"
+              aria-label={`Delete ${folder.name}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onDelete(folder.id);
+              }}
+            >
+              <Trash2 size={13} />
+            </button>
+          </span>
+        )}
       </div>
 
       {/* =========================
@@ -234,23 +281,7 @@ function TreeNode({
           ========================= */}
 
           {folder.children
-            ?.filter((child) => {
-              // If this is the currently selected folder,
-              // show all of its direct children.
-              if (folder.id === selectedId) {
-                return true;
-              }
-
-              // For folders on the selected path, show only
-              // the next folder that leads to the selection.
-              if (selectedPathIds.has(folder.id)) {
-                return selectedPathIds.has(child.id);
-              }
-
-              // Root / unrelated branches are shown normally.
-              return true;
-            })
-            .map((child) => (
+            ?.map((child) => (
               <TreeNode
                 key={child.id}
                 folder={child}
@@ -259,7 +290,8 @@ function TreeNode({
                 expandedIds={expandedIds}
                 onToggle={onToggle}
                 onSelect={onSelect}
-                selectedPathIds={selectedPathIds}
+                onEdit={onEdit}
+                onDelete={onDelete}
               />
             ))}
 
@@ -300,6 +332,12 @@ function TreeNode({
    ========================================================= */
 
 export function Books() {
+  const navigate = useNavigate();
+  const {
+    root: rootFolder,
+    deleteFolder,
+  } = useBooksContext();
+
   const [selectedFolderId, setSelectedFolderId] =
     useState("science");
 
@@ -346,22 +384,6 @@ export function Books() {
         rootFolder,
         selectedFolderId
       ) ?? [rootFolder]
-    );
-  }, [selectedFolderId]);
-
-  /* =======================================================
-     SELECTED TREE PATH
-     ======================================================= */
-
-  const selectedPathIds = useMemo(() => {
-    const path =
-      findPath(
-        rootFolder,
-        selectedFolderId
-      ) ?? [];
-
-    return new Set(
-      path.map((folder) => folder.id)
     );
   }, [selectedFolderId]);
 
@@ -462,6 +484,25 @@ export function Books() {
 
       return next;
     });
+  };
+
+  const editFolder = (id: string) => {
+    navigate(`/category/folders/new?editId=${encodeURIComponent(id)}`);
+  };
+
+  const removeFolder = (id: string) => {
+    const folder = findFolder(rootFolder, id);
+    if (!folder || !window.confirm(`Delete folder "${folder.name}" and everything inside it?`)) {
+      return;
+    }
+
+    const path = findPath(rootFolder, id);
+    const parent = path && path.length > 1 ? path[path.length - 2] : rootFolder;
+    deleteFolder(id);
+
+    if (selectedFolderId === id || path?.some((item) => item.id === selectedFolderId)) {
+      setSelectedFolderId(parent.id);
+    }
   };
 
   /* =======================================================
@@ -565,7 +606,8 @@ export function Books() {
               expandedIds={expandedIds}
               onToggle={toggleFolder}
               onSelect={selectFolder}
-              selectedPathIds={selectedPathIds}
+              onEdit={editFolder}
+              onDelete={removeFolder}
             />
           </div>
         </aside>
@@ -649,21 +691,42 @@ export function Books() {
                 flexShrink: 0,
               }}
             >
-              <Link
-                to="/books/addnewbook"
-                className="add-book-button"
-              >
-                <Plus size={17} />
-                Add New Book
-              </Link>
+              {(() => {
+                const type = getFolderType(selectedFolder);
 
-              <Link
-                to="/books/folders/new"
-                className="add-folder-button"
-              >
-                <Plus size={17} />
-                Add Folder
-              </Link>
+                const showBook =
+                  type === "has-books" ||
+                  type === "empty";
+
+                const showFolder =
+                  type === "root" ||
+                  type === "has-folders" ||
+                  type === "empty";
+
+                return (
+                  <>
+                    {showBook && (
+                      <Link
+                        to="/category/addnewbook"
+                        className="add-book-button"
+                      >
+                        <Plus size={17} />
+                        Add New Book
+                      </Link>
+                    )}
+
+                    {showFolder && (
+                      <Link
+                        to={`/category/folders/new?parentId=${selectedFolderId}`}
+                        className="add-folder-button"
+                      >
+                        <Plus size={17} />
+                        Add Folder
+                      </Link>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
 

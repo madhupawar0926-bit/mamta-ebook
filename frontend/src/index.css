@@ -47,3 +47,7 @@ img {
   max-width: 100%;
   display: block;
 }
+
+body:has(.login-page) {
+  background: #eef7f3;
+}

@@ -166,14 +166,8 @@ export function Dashboard() {
      DATE RANGE
      ========================================================= */
 
-  const [dateRange, setDateRange] = useState<
-    [Date | null, Date | null]
-  >([
-    new Date(2026, 7, 14),
-    new Date(2026, 7, 14),
-  ]);
 
-  const [startDate, endDate] = dateRange;
+
 
   const activeChartData =
     chartDataByPeriod[chartPeriod];
@@ -216,39 +210,7 @@ export function Dashboard() {
             DATE PICKER
         ================================================= */}
 
-        <div className="date-picker-wrapper">
-          <DatePicker
-            selectsRange
-            startDate={startDate}
-            endDate={endDate}
-            onChange={(update) => {
-              setDateRange(update);
-            }}
-            dateFormat="dd MMM yyyy"
-            popperPlacement="bottom-end"
-            popperClassName="dashboard-date-popper"
-            customInput={
-              <button
-                type="button"
-                className="date-filter"
-              >
-                <CalendarDays size={16} />
-
-                <span>
-                  {startDate && endDate
-                    ? `${formatDate(
-                        startDate
-                      )} - ${formatDate(endDate)}`
-                    : "Select Date Range"}
-                </span>
-
-                <span className="date-arrow">
-                  ▾
-                </span>
-              </button>
-            }
-          />
-        </div>
+       
 
       </div>
 

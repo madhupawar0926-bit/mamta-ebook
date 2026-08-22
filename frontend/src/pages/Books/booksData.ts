@@ -188,10 +188,6 @@ export const rootFolder: BookFolder = {
                           ],
                         },
                       ],
-
-                      books: [
-                        books[0],
-                      ],
                     },
 
                     {
@@ -228,10 +224,6 @@ export const rootFolder: BookFolder = {
                             books[2],
                           ],
                         },
-                      ],
-
-                      books: [
-                        books[2],
                       ],
                     },
 

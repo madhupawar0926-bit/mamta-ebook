@@ -4,6 +4,8 @@ import {
   Grid2X2,
   LogOut,
   IndianRupee,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import logo from "../assets/logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -13,194 +15,126 @@ import "./Sidebar.css";
 interface SidebarProps {
   mobileOpen?: boolean;
   onClose?: () => void;
+  collapsed?: boolean;
+  onCollapseToggle?: () => void;
 }
 
 export function Sidebar({
   mobileOpen = false,
   onClose,
+  collapsed = false,
+  onCollapseToggle,
 }: SidebarProps) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear login data
     localStorage.clear();
     sessionStorage.clear();
-
-    // Close mobile sidebar
     onClose?.();
-
-    // Go to login page
     navigate("/login", { replace: true });
   };
 
   return (
     <>
-      {/* ================= OVERLAY ================= */}
-
+      {/* OVERLAY */}
       {mobileOpen && (
-        <div
-          className="sidebar-overlay"
-          onClick={onClose}
-        />
+        <div className="sidebar-overlay" onClick={onClose} />
       )}
 
-      {/* ================= SIDEBAR ================= */}
-
+      {/* SIDEBAR */}
       <aside
-        className={`sidebar ${
-          mobileOpen ? "sidebar-mobile-open" : ""
-        }`}
+        className={`sidebar ${mobileOpen ? "sidebar-mobile-open" : ""} ${collapsed ? "sidebar-collapsed" : ""}`}
       >
 
-        {/* ================= BRAND ================= */}
+        <button
+          type="button"
+          className="sidebar-collapse-toggle"
+          onClick={onCollapseToggle}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+        </button>
 
+        {/* BRAND */}
         <div className="sidebar-brand">
-
-         <div className="brand-logo">
-  <img src={logo} alt="Logo" />
-</div>
-
-          <div className="brand-text">
-            <strong>MAMTA</strong>
-
-            <span>
-              E-Book Publication
-            </span>
+          <div className="brand-logo">
+            <img src={logo} alt="Logo" />
           </div>
-
+          {!collapsed && (
+            <div className="brand-text">
+              <strong>MAMTA</strong>
+              <span>E-Book Publication</span>
+            </div>
+          )}
         </div>
 
-
-        {/* ================= MENU ================= */}
-
+        {/* NAV */}
         <nav className="sidebar-nav">
-
-          {/* DASHBOARD */}
 
           <NavLink
             to="/"
             end
-            className={({ isActive }) =>
-              `sidebar-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}
             onClick={onClose}
+            title={collapsed ? "Dashboard" : undefined}
           >
-            <Grid2X2
-              size={17}
-              strokeWidth={1.8}
-            />
-
-            <span>
-              Dashboard
-            </span>
+            <Grid2X2 size={17} strokeWidth={1.8} />
+            {!collapsed && <span>Dashboard</span>}
           </NavLink>
-
-
-          {/* BOOKS */}
 
           <NavLink
-            to="/books"
-            className={({ isActive }) =>
-              `sidebar-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            to="/category"
+            className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}
             onClick={onClose}
+            title={collapsed ? "Category" : undefined}
           >
-            <BookOpen
-              size={17}
-              strokeWidth={1.8}
-            />
-
-            <span>
-              Category
-            </span>
+            <BookOpen size={17} strokeWidth={1.8} />
+            {!collapsed && <span>Category</span>}
           </NavLink>
-
-
-          {/* EARNINGS */}
 
           <NavLink
             to="/earnings"
-            className={({ isActive }) =>
-              `sidebar-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}
             onClick={onClose}
+            title={collapsed ? "Earnings" : undefined}
           >
-            <IndianRupee
-              size={17}
-              strokeWidth={1.8}
-            />
-
-            <span>
-              Earnings
-            </span>
+            <IndianRupee size={17} strokeWidth={1.8} />
+            {!collapsed && <span>Earnings</span>}
           </NavLink>
 
         </nav>
 
-
-        {/* ================= BOTTOM ================= */}
-
+        {/* BOTTOM */}
         <div className="sidebar-bottom">
-
-          {/* SINGLE ACCOUNT BOX */}
-
           <div className="sidebar-account-box">
 
-            {/* USER */}
-
             <div className="sidebar-user">
-
               <div className="user-avatar">
-                <span>
-                  AU
-                </span>
+                <span>AU</span>
               </div>
-
-              <div className="user-details">
-
-                <strong>
-                  Admin User
-                </strong>
-
-                <span>
-                  Administrator
-                </span>
-
-              </div>
-
-              <ChevronDown
-                size={14}
-                className="user-chevron"
-              />
-
+              {!collapsed && (
+                <>
+                  <div className="user-details">
+                    <strong>Admin User</strong>
+                    <span>Administrator</span>
+                  </div>
+                  <ChevronDown size={14} className="user-chevron" />
+                </>
+              )}
             </div>
-
-
-            {/* LOGOUT */}
 
             <button
               type="button"
               className="logout-button"
               onClick={handleLogout}
+              title={collapsed ? "Logout" : undefined}
             >
-              <LogOut
-                size={16}
-                strokeWidth={1.8}
-              />
-
-              <span>
-                Logout
-              </span>
+              <LogOut size={16} strokeWidth={1.8} />
+              {!collapsed && <span>Logout</span>}
             </button>
 
           </div>
-
         </div>
 
       </aside>

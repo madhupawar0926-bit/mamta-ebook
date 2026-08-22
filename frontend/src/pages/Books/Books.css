@@ -325,6 +325,42 @@
   text-overflow: ellipsis;
 }
 
+.tree-folder-actions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.tree-row:hover .tree-folder-actions,
+.tree-row:focus-within .tree-folder-actions {
+  opacity: 1;
+}
+
+.tree-folder-actions button {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #667085;
+  cursor: pointer;
+}
+
+.tree-folder-actions button:hover {
+  background: #eafaf0;
+  color: #008354;
+}
+
+.tree-folder-actions button:last-child:hover {
+  background: #fff1f0;
+  color: #d92d20;
+}
+
 
 /* =========================================================
    RIGHT CONTENT

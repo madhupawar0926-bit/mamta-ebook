@@ -22,15 +22,15 @@ function Header({ onMenuClick }: HeaderProps) {
       return "Dashboard";
     }
 
-    if (location.pathname.startsWith("/books/add")) {
+    if (location.pathname.startsWith("/category/add")) {
       return "Add New Book";
     }
 
-    if (location.pathname.startsWith("/books/folder/add")) {
+    if (location.pathname.startsWith("/category/folder/add")) {
       return "Add New Folder";
     }
 
-    if (location.pathname.startsWith("/books")) {
+    if (location.pathname.startsWith("/category")) {
       return "Books";
     }
 
@@ -46,11 +46,12 @@ function Header({ onMenuClick }: HeaderProps) {
 
       <div className="header-left">
 
+        {/* MOBILE hamburger */}
         <button
           className="mobile-menu-button"
           onClick={onMenuClick}
         >
-          <Menu size={24} />
+          <Menu size={22} />
         </button>
 
         <h1>{getTitle()}</h1>
