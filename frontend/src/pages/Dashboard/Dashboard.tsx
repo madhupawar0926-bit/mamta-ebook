@@ -3,7 +3,6 @@ import {
   Users,
   ShoppingCart,
   IndianRupee,
-  
   TrendingUp,
   TrendingDown,
   CalendarDays,
@@ -149,33 +148,6 @@ const topBooks = [
 ];
 
 /* =========================================================
-   QUICK ACTIONS
-   ========================================================= */
-
-// const quickActions = [
-//   {
-//     title: "Add New Book",
-//     description: "Upload a new ebook",
-//     icon: BookOpen,
-//   },
-//   {
-//     title: "Add Folder",
-//     description: "Create new category",
-//     icon: FolderPlus,
-//   },
-//   {
-//     title: "Send Notification",
-//     description: "Notify all users",
-//     icon: Bell,
-//   },
-//   {
-//     title: "View Transactions",
-//     description: "See all orders",
-//     icon: FileText,
-//   },
-// ];
-
-/* =========================================================
    DASHBOARD
    ========================================================= */
 
@@ -184,10 +156,10 @@ export function Dashboard() {
     useState<keyof typeof chartDataByPeriod>("Monthly");
 
   /* =========================================================
-     SELECTED GRAPH BAR
+     HOVERED GRAPH BAR
      ========================================================= */
 
-  const [selectedChartMonth, setSelectedChartMonth] =
+  const [hoveredChartMonth, setHoveredChartMonth] =
     useState<string | null>(null);
 
   /* =========================================================
@@ -221,16 +193,6 @@ export function Dashboard() {
       month: "short",
       year: "numeric",
     });
-  };
-
-  /* =========================================================
-     HANDLE CHART BAR CLICK
-     ========================================================= */
-
-  const handleChartBarClick = (month: string) => {
-    setSelectedChartMonth((current) =>
-      current === month ? null : month
-    );
   };
 
   return (
@@ -287,6 +249,7 @@ export function Dashboard() {
             }
           />
         </div>
+
       </div>
 
       {/* =====================================================
@@ -414,13 +377,11 @@ export function Dashboard() {
                 className="year-select"
                 value={chartPeriod}
                 onChange={(e) => {
-
                   setChartPeriod(
                     e.target.value as keyof typeof chartDataByPeriod
                   );
 
-                  setSelectedChartMonth(null);
-
+                  setHoveredChartMonth(null);
                 }}
               >
 
@@ -499,12 +460,11 @@ export function Dashboard() {
 
                 {activeChartData.map((item) => {
 
-                  const isSelected =
-                    selectedChartMonth ===
+                  const isHovered =
+                    hoveredChartMonth ===
                     item.month;
 
                   return (
-
                     <div
                       className="chart-column"
                       key={item.month}
@@ -512,46 +472,28 @@ export function Dashboard() {
 
                       <div
                         className={`bar-group ${
-                          isSelected
-                            ? "selected"
+                          isHovered
+                            ? "hovered"
                             : ""
                         }`}
-                        onClick={() =>
-                          handleChartBarClick(
+                        onMouseEnter={() =>
+                          setHoveredChartMonth(
                             item.month
                           )
                         }
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(event) => {
-
-                          if (
-                            event.key ===
-                              "Enter" ||
-                            event.key ===
-                              " "
-                          ) {
-                            event.preventDefault();
-
-                            handleChartBarClick(
-                              item.month
-                            );
-                          }
-
-                        }}
+                        onMouseLeave={() =>
+                          setHoveredChartMonth(
+                            null
+                          )
+                        }
                       >
 
                         {/* =====================================
-                            CLICKED VALUE TOOLTIP
+                            HOVER TOOLTIP
                         ===================================== */}
 
-                        {isSelected && (
-
+                        {isHovered && (
                           <div className="chart-value-tooltip">
-
-                            <div className="tooltip-month">
-                              {item.month}
-                            </div>
 
                             <div className="tooltip-row">
 
@@ -582,7 +524,6 @@ export function Dashboard() {
                             </div>
 
                           </div>
-
                         )}
 
                         {/* =====================================
@@ -614,7 +555,6 @@ export function Dashboard() {
                       </span>
 
                     </div>
-
                   );
                 })}
 
@@ -744,7 +684,6 @@ export function Dashboard() {
       ===================================================== */}
 
       {/*
-
       <section className="quick-actions-card">
 
         <h3>
@@ -790,7 +729,6 @@ export function Dashboard() {
         </div>
 
       </section>
-
       */}
 
     </div>

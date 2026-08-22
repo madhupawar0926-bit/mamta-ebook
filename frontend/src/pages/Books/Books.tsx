@@ -6,9 +6,9 @@ import {
   ChevronUp,
   Folder,
   FolderOpen,
+  BookOpen,
   Home,
   MoreVertical,
-  Pencil,
   Plus,
   Search,
   SlidersHorizontal,
@@ -26,7 +26,6 @@ import {
 
 import "./Books.css";
 
-
 /* =========================================================
    HELPERS
    ========================================================= */
@@ -35,13 +34,11 @@ function findFolder(
   folder: BookFolder,
   id: string
 ): BookFolder | null {
-
   if (folder.id === id) {
     return folder;
   }
 
   for (const child of folder.children ?? []) {
-
     const result = findFolder(child, id);
 
     if (result) {
@@ -52,13 +49,11 @@ function findFolder(
   return null;
 }
 
-
 function findPath(
   folder: BookFolder,
   id: string,
   currentPath: BookFolder[] = []
 ): BookFolder[] | null {
-
   const nextPath = [
     ...currentPath,
     folder,
@@ -69,7 +64,6 @@ function findPath(
   }
 
   for (const child of folder.children ?? []) {
-
     const result = findPath(
       child,
       id,
@@ -84,11 +78,9 @@ function findPath(
   return null;
 }
 
-
 function countSubfolders(
   folder: BookFolder
 ): number {
-
   let count = folder.children?.length ?? 0;
 
   for (const child of folder.children ?? []) {
@@ -98,19 +90,15 @@ function countSubfolders(
   return count;
 }
 
-
 function countDirectBooks(
   folder: BookFolder
 ): number {
-
   return folder.books?.length ?? 0;
 }
-
 
 function countAllBooks(
   folder: BookFolder
 ): number {
-
   let count = folder.books?.length ?? 0;
 
   for (const child of folder.children ?? []) {
@@ -119,7 +107,6 @@ function countAllBooks(
 
   return count;
 }
-
 
 /* =========================================================
    TREE NODE
@@ -132,8 +119,8 @@ type TreeNodeProps = {
   expandedIds: Set<string>;
   onToggle: (id: string) => void;
   onSelect: (id: string) => void;
+  selectedPathIds: Set<string>;
 };
-
 
 function TreeNode({
   folder,
@@ -142,10 +129,16 @@ function TreeNode({
   expandedIds,
   onToggle,
   onSelect,
+  selectedPathIds,
 }: TreeNodeProps) {
-
   const hasChildren =
     (folder.children?.length ?? 0) > 0;
+
+  const hasBooks =
+    (folder.books?.length ?? 0) > 0;
+
+  const hasTreeItems =
+    hasChildren || hasBooks;
 
   const isExpanded =
     expandedIds.has(folder.id);
@@ -153,32 +146,52 @@ function TreeNode({
   const isSelected =
     selectedId === folder.id;
 
+  /*
+   * IMPORTANT:
+   * Keep indentation controlled even when there are
+   * many nested folders.
+   *
+   * 8px = base padding
+   * 18px = indentation per level
+   * 5 = maximum visual indentation levels
+   *
+   * This prevents the tree from continuously moving
+   * towards the right when more folders are added.
+   */
+  const visualLevel = Math.min(level, 5);
+
+  const folderPadding =
+    8 + visualLevel * 18;
+
+  const bookPadding =
+    8 + Math.min(level + 1, 5) * 18;
+
   return (
     <div className="tree-node">
+      {/* =========================
+          FOLDER ROW
+      ========================= */}
 
       <div
         className={`tree-row ${
           isSelected ? "selected" : ""
         }`}
         style={{
-          paddingLeft: `${12 + level * 24}px`,
+          paddingLeft: `${folderPadding}px`,
         }}
         onClick={() => onSelect(folder.id)}
       >
-
         <button
           type="button"
           className={`tree-chevron ${
-            !hasChildren ? "empty" : ""
+            !hasTreeItems ? "empty" : ""
           }`}
           onClick={(event) => {
-
             event.stopPropagation();
 
-            if (hasChildren) {
+            if (hasTreeItems) {
               onToggle(folder.id);
             }
-
           }}
           aria-label={
             isExpanded
@@ -186,7 +199,6 @@ function TreeNode({
               : "Expand folder"
           }
         >
-
           {hasChildren ? (
             isExpanded ? (
               <ChevronDown size={14} />
@@ -196,59 +208,98 @@ function TreeNode({
           ) : (
             <span />
           )}
-
         </button>
 
-
         <span className="tree-folder-icon">
-
           {isExpanded ? (
             <FolderOpen size={16} />
           ) : (
             <Folder size={16} />
           )}
-
         </span>
-
 
         <span className="tree-folder-name">
           {folder.name}
         </span>
-
       </div>
 
+      {/* =========================
+          CHILDREN
+      ========================= */}
 
-      {isExpanded && hasChildren && (
+      {isExpanded && hasTreeItems && (
         <div className="tree-children">
+          {/* =========================
+              CHILD FOLDERS
+          ========================= */}
 
-          {folder.children!.map((child) => (
+          {folder.children
+            ?.filter((child) => {
+              // If this is the currently selected folder,
+              // show all of its direct children.
+              if (folder.id === selectedId) {
+                return true;
+              }
 
-            <TreeNode
-              key={child.id}
-              folder={child}
-              level={level + 1}
-              selectedId={selectedId}
-              expandedIds={expandedIds}
-              onToggle={onToggle}
-              onSelect={onSelect}
-            />
+              // For folders on the selected path, show only
+              // the next folder that leads to the selection.
+              if (selectedPathIds.has(folder.id)) {
+                return selectedPathIds.has(child.id);
+              }
 
+              // Root / unrelated branches are shown normally.
+              return true;
+            })
+            .map((child) => (
+              <TreeNode
+                key={child.id}
+                folder={child}
+                level={level + 1}
+                selectedId={selectedId}
+                expandedIds={expandedIds}
+                onToggle={onToggle}
+                onSelect={onSelect}
+                selectedPathIds={selectedPathIds}
+              />
+            ))}
+
+          {/* =========================
+              BOOKS
+          ========================= */}
+
+          {folder.books?.map((book) => (
+            <div
+              key={`book-${book.id}`}
+              className="tree-row tree-book-row"
+              style={{
+                paddingLeft: `${bookPadding}px`,
+              }}
+              title={book.title}
+            >
+              <span className="tree-chevron empty">
+                <span />
+              </span>
+
+              <span className="tree-book-icon">
+                <BookOpen size={15} />
+              </span>
+
+              <span className="tree-folder-name tree-book-name">
+                {book.title}
+              </span>
+            </div>
           ))}
-
         </div>
       )}
-
     </div>
   );
 }
-
 
 /* =========================================================
    MAIN COMPONENT
    ========================================================= */
 
 export function Books() {
-
   const [selectedFolderId, setSelectedFolderId] =
     useState("science");
 
@@ -272,83 +323,86 @@ export function Books() {
   const [mobileTreeOpen, setMobileTreeOpen] =
     useState(false);
 
-
   /* =======================================================
      SELECTED FOLDER
      ======================================================= */
 
   const selectedFolder = useMemo(() => {
-
     return (
       findFolder(
         rootFolder,
         selectedFolderId
       ) ?? rootFolder
     );
-
   }, [selectedFolderId]);
-
 
   /* =======================================================
      BREADCRUMB
      ======================================================= */
 
   const breadcrumb = useMemo(() => {
-
     return (
       findPath(
         rootFolder,
         selectedFolderId
       ) ?? [rootFolder]
     );
-
   }, [selectedFolderId]);
 
+  /* =======================================================
+     SELECTED TREE PATH
+     ======================================================= */
+
+  const selectedPathIds = useMemo(() => {
+    const path =
+      findPath(
+        rootFolder,
+        selectedFolderId
+      ) ?? [];
+
+    return new Set(
+      path.map((folder) => folder.id)
+    );
+  }, [selectedFolderId]);
 
   /* =======================================================
      FOLDER FILTER
      ======================================================= */
 
-  const visibleFolders = useMemo(() => {
+  // const visibleFolders = useMemo(() => {
+  //   const folders =
+  //     selectedFolder.children ?? [];
 
-    const folders =
-      selectedFolder.children ?? [];
+  //   return folders.filter((folder) => {
+  //     const matchesSearch =
+  //       folder.name
+  //         .toLowerCase()
+  //         .includes(search.toLowerCase());
 
-    return folders.filter((folder) => {
+  //     const matchesStatus =
+  //       statusFilter === "All" ||
+  //       folder.status === statusFilter;
 
-      const matchesSearch =
-        folder.name
-          .toLowerCase()
-          .includes(search.toLowerCase());
-
-      const matchesStatus =
-        statusFilter === "All" ||
-        folder.status === statusFilter;
-
-      return (
-        matchesSearch &&
-        matchesStatus
-      );
-    });
-
-  }, [
-    selectedFolder,
-    search,
-    statusFilter,
-  ]);
-
+  //     return (
+  //       matchesSearch &&
+  //       matchesStatus
+  //     );
+  //   });
+  // }, [
+  //   selectedFolder,
+  //   search,
+  //   statusFilter,
+  // ]);
 
   /* =======================================================
      BOOK FILTER
      ======================================================= */
 
   const visibleBooks = useMemo(() => {
-
     const folderBooks =
       selectedFolder.books ?? [];
 
     return folderBooks.filter((book) => {
-
       const matchesSearch =
         `${book.title} ${book.author} ${book.code}`
           .toLowerCase()
@@ -363,22 +417,18 @@ export function Books() {
         matchesStatus
       );
     });
-
   }, [
     selectedFolder,
     search,
     statusFilter,
   ]);
 
-
   /* =======================================================
      TOGGLE TREE
      ======================================================= */
 
   const toggleFolder = (id: string) => {
-
     setExpandedIds((previous) => {
-
       const next = new Set(previous);
 
       if (next.has(id)) {
@@ -391,19 +441,16 @@ export function Books() {
     });
   };
 
-
   /* =======================================================
      SELECT FOLDER
      ======================================================= */
 
   const selectFolder = (id: string) => {
-
     setSelectedFolderId(id);
 
     setMobileTreeOpen(false);
 
     setExpandedIds((previous) => {
-
       const next = new Set(previous);
 
       const path =
@@ -416,7 +463,6 @@ export function Books() {
       return next;
     });
   };
-
 
   /* =======================================================
      SUMMARY
@@ -431,65 +477,38 @@ export function Books() {
   const totalSubfolders =
     countSubfolders(selectedFolder);
 
-
   return (
     <div className="books-page">
-
 
       {/* ===================================================
           PAGE HEADER
           =================================================== */}
 
       <div className="books-page-header">
- {/* <div className="books-tabs">
+        {/* <div className="books-tabs">
 
-        <button
-          type="button"
-          className="books-tab active"
-        >
-          Catalogue
-        </button>
+          <button
+            type="button"
+            className="books-tab active"
+          >
+            Catalogue
+          </button>
 
-        <button
-          type="button"
-          className="books-tab"
-        >
-          All Books
-        </button>
+          <button
+            type="button"
+            className="books-tab"
+          >
+            All Books
+          </button>
 
-      </div> */}
-       
+        </div> */}
 
-
-        <div className="books-header-actions">
-
-          <Link
-  to="/books/addnewbook"
-  className="add-book-button"
->
-  <Plus size={17} />
-  Add New Book
-</Link>
-
-<Link
-  to="/books/folders/new"
-  className="add-folder-button"
->
-  <Plus size={17} />
-  Add Folder
-</Link>
-
-        </div>
-
+        <div className="books-header-actions-placeholder" />
       </div>
-
 
       {/* ===================================================
           TABS
           =================================================== */}
-
-     
-
 
       {/* ===================================================
           MOBILE TREE BUTTON
@@ -509,9 +528,7 @@ export function Books() {
         <ChevronRight size={16} />
       </button>
 
-
       <div className="books-layout">
-
 
         {/* =================================================
             LEFT TREE
@@ -524,9 +541,7 @@ export function Books() {
               : ""
           }`}
         >
-
           <div className="catalogue-header">
-
             <strong>
               Catalogue Structure
             </strong>
@@ -540,12 +555,9 @@ export function Books() {
             >
               <ChevronUp size={16} />
             </button>
-
           </div>
 
-
           <div className="catalogue-tree">
-
             <TreeNode
               folder={rootFolder}
               level={0}
@@ -553,12 +565,10 @@ export function Books() {
               expandedIds={expandedIds}
               onToggle={toggleFolder}
               onSelect={selectFolder}
+              selectedPathIds={selectedPathIds}
             />
-
           </div>
-
         </aside>
-
 
         {/* =================================================
             RIGHT CONTENT
@@ -566,18 +576,29 @@ export function Books() {
 
         <main className="books-content">
 
-
           {/* ===============================================
               BREADCRUMB
               =============================================== */}
 
-          <div className="breadcrumb-card">
-
-            <div className="breadcrumb">
-
+          <div
+            className="breadcrumb-card"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "16px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              className="breadcrumb"
+              style={{
+                minWidth: 0,
+                flex: "1 1 auto",
+              }}
+            >
               {breadcrumb.map(
                 (folder, index) => {
-
                   const isLast =
                     index ===
                     breadcrumb.length - 1;
@@ -587,7 +608,6 @@ export function Books() {
                       className="breadcrumb-item"
                       key={folder.id}
                     >
-
                       {index === 0 ? (
                         <Home size={15} />
                       ) : null}
@@ -614,16 +634,38 @@ export function Books() {
                       >
                         {folder.name}
                       </button>
-
                     </div>
                   );
                 }
               )}
-
             </div>
 
-          </div>
+            <div
+              className="books-header-actions"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                flexShrink: 0,
+              }}
+            >
+              <Link
+                to="/books/addnewbook"
+                className="add-book-button"
+              >
+                <Plus size={17} />
+                Add New Book
+              </Link>
 
+              <Link
+                to="/books/folders/new"
+                className="add-folder-button"
+              >
+                <Plus size={17} />
+                Add Folder
+              </Link>
+            </div>
+          </div>
 
           {/* ===============================================
               SEARCH / FILTER BAR
@@ -632,7 +674,6 @@ export function Books() {
           <div className="catalogue-toolbar">
 
             <div className="catalogue-search">
-
               <Search size={17} />
 
               <input
@@ -655,12 +696,9 @@ export function Books() {
                   <X size={14} />
                 </button>
               )}
-
             </div>
 
-
             <div className="status-filter">
-
               <SlidersHorizontal
                 size={15}
               />
@@ -687,18 +725,14 @@ export function Books() {
               </select>
 
               <ChevronDown size={14} />
-
             </div>
 
-
             <div className="toolbar-actions">
-
               <button
                 type="button"
                 className="outline-action"
               >
                 <ArrowUpDown size={15} />
-
                 Reorder
               </button>
 
@@ -707,20 +741,16 @@ export function Books() {
                 className="outline-action"
               >
                 <Move size={15} />
-
                 Move
               </button>
-
             </div>
-
           </div>
-
 
           {/* ===============================================
               FOLDER TABLE
               =============================================== */}
 
-          <div className="catalogue-table-card">
+          {/* <div className="catalogue-table-card">
 
             <div className="table-scroll">
 
@@ -730,26 +760,41 @@ export function Books() {
 
                   <tr>
 
-                    <th>Name</th>
+                    <th style={{ minWidth: "230px" }}>
+                      Name
+                    </th>
 
-                    <th>Type</th>
+                    <th>
+                      Type
+                    </th>
 
-                    <th>Subfolders</th>
+                    <th>
+                      Subfolders
+                    </th>
 
-                    <th>Books</th>
+                    <th>
+                      Books
+                    </th>
 
-                    <th>Status</th>
+                    <th>
+                      Status
+                    </th>
 
-                    <th>Sort Order</th>
+                    <th>
+                      Sort Order
+                    </th>
 
-                    <th>Updated At</th>
+                    <th>
+                      Updated At
+                    </th>
 
-                    <th>Actions</th>
+                    <th>
+                      Actions
+                    </th>
 
                   </tr>
 
                 </thead>
-
 
                 <tbody>
 
@@ -783,7 +828,16 @@ export function Books() {
                               className="table-folder-icon"
                             />
 
-                            <span>
+                            <span
+                              className="table-name-text"
+                              style={{
+                                whiteSpace: "normal",
+                                overflow: "visible",
+                                textOverflow: "clip",
+                                wordBreak: "break-word",
+                                lineHeight: 1.35,
+                              }}
+                            >
                               {folder.name}
                             </span>
 
@@ -791,23 +845,19 @@ export function Books() {
 
                         </td>
 
-
                         <td>
                           <span className="type-text">
                             Folder
                           </span>
                         </td>
 
-
                         <td>
                           {folder.children?.length ?? 0}
                         </td>
 
-
                         <td>
                           {countDirectBooks(folder)}
                         </td>
-
 
                         <td>
                           <StatusBadge
@@ -817,16 +867,13 @@ export function Books() {
                           />
                         </td>
 
-
                         <td>
                           {folder.sortOrder}
                         </td>
 
-
                         <td>
                           {folder.updatedAt}
                         </td>
-
 
                         <td>
 
@@ -872,7 +919,6 @@ export function Books() {
                     )
                   )}
 
-
                   {visibleFolders.length === 0 && (
                     <tr>
 
@@ -892,113 +938,80 @@ export function Books() {
 
             </div>
 
-          </div>
-
+          </div> */}
 
           {/* ===============================================
               BOOKS + SUMMARY
               =============================================== */}
 
-          <div className="books-bottom-grid">
+          <div
+            className="books-bottom-grid"
+            style={{
+              gridTemplateColumns:
+                visibleBooks.length > 0
+                  ? undefined
+                  : "minmax(0, 1fr)",
+            }}
+          >
+            {visibleBooks.length > 0 && (
+              <div className="folder-books-card">
 
+                <div className="folder-books-header">
+                  <h2>
+                    Books in this folder{" "}
+                    <span>
+                      ({visibleBooks.length})
+                    </span>
+                  </h2>
+                </div>
 
-            {/* =============================================
-                BOOKS
-                ============================================= */}
+                <div className="table-scroll">
+                  <table className="folder-books-table">
 
-            <div className="folder-books-card">
-
-              <div className="folder-books-header">
-
-                <h2>
-                  Books in this folder{" "}
-                  <span>
-                    ({visibleBooks.length})
-                  </span>
-                </h2>
-
-              </div>
-
-
-              <div className="table-scroll">
-
-                <table className="folder-books-table">
-
-                  <thead>
-
-                    <tr>
-
-                      <th>Book</th>
-
-                      <th>Author</th>
-
-                      <th>Price</th>
-
-                      <th>Purchases</th>
-
-                      <th>Status</th>
-
-                      <th>Updated At</th>
-
-                      <th>Actions</th>
-
-                    </tr>
-
-                  </thead>
-
-
-                  <tbody>
-
-                    {visibleBooks.map(
-                      (book) => (
-
-                        <BookRow
-                          key={book.id}
-                          book={book}
-                        />
-
-                      )
-                    )}
-
-
-                    {visibleBooks.length === 0 && (
+                    <thead>
                       <tr>
-
-                        <td
-                          colSpan={7}
-                          className="empty-state"
-                        >
-                          No books in this folder.
-                        </td>
-
+                        <th>Book</th>
+                        <th>Author</th>
+                        <th>Price</th>
+                        <th>Purchases</th>
+                        <th>Status</th>
+                        <th>Updated At</th>
+                        <th>Actions</th>
                       </tr>
-                    )}
+                    </thead>
 
-                  </tbody>
+                    <tbody>
+                      {visibleBooks.map(
+                        (book) => (
+                          <BookRow
+                            key={book.id}
+                            book={book}
+                          />
+                        )
+                      )}
+                    </tbody>
 
-                </table>
+                  </table>
+                </div>
+
+                <button
+                  type="button"
+                  className="view-books-button"
+                >
+                  View all books in this folder
+                  <ChevronRight size={16} />
+                </button>
 
               </div>
+            )}
 
-
-              <button
-                type="button"
-                className="view-books-button"
-              >
-                View all books in this folder
-
-                <ChevronRight size={16} />
-              </button>
-
-            </div>
-
-
-            {/* =============================================
-                SUMMARY
-                ============================================= */}
-
-            <aside className="folder-summary">
-
+            <aside
+              className="folder-summary"
+              style={{
+                width: "100%",
+                minWidth: 0,
+              }}
+            >
               <div className="summary-title">
 
                 <h2>
@@ -1011,7 +1024,6 @@ export function Books() {
 
               </div>
 
-
               <SummaryItem
                 label="Total Subfolders"
                 value={String(
@@ -1020,14 +1032,12 @@ export function Books() {
                 )}
               />
 
-
               <SummaryItem
                 label="Direct Books"
                 value={String(
                   directBooks
                 )}
               />
-
 
               <SummaryItem
                 label="Total Books in Subtree"
@@ -1036,7 +1046,6 @@ export function Books() {
                 )}
               />
 
-
               <SummaryItem
                 label="Total Subfolders in Subtree"
                 value={String(
@@ -1044,9 +1053,7 @@ export function Books() {
                 )}
               />
 
-
               <div className="summary-divider" />
-
 
               <SummaryItem
                 label="Last Updated"
@@ -1055,9 +1062,7 @@ export function Books() {
                 }
               />
 
-
               <div className="summary-visibility">
-
                 <span>
                   Visibility
                 </span>
@@ -1067,21 +1072,15 @@ export function Books() {
                     selectedFolder.status
                   }
                 />
-
               </div>
-
             </aside>
-
           </div>
 
         </main>
-
       </div>
-
     </div>
   );
 }
-
 
 /* =========================================================
    BOOK ROW
@@ -1092,12 +1091,10 @@ function BookRow({
 }: {
   book: Book;
 }) {
-
   return (
     <tr>
 
       <td>
-
         <div className="book-table-info">
 
           <img
@@ -1107,7 +1104,14 @@ function BookRow({
 
           <div>
 
-            <strong>
+            <strong
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "7px",
+              }}
+            >
+              <BookOpen size={15} />
               {book.title}
             </strong>
 
@@ -1118,24 +1122,19 @@ function BookRow({
           </div>
 
         </div>
-
       </td>
-
 
       <td>
         {book.author}
       </td>
 
-
       <td>
         ₹{book.price}
       </td>
 
-
       <td>
         {book.purchases.toLocaleString()}
       </td>
-
 
       <td>
         <StatusBadge
@@ -1143,27 +1142,22 @@ function BookRow({
         />
       </td>
 
-
       <td>
         {book.updatedAt}
       </td>
 
-
       <td>
-
         <button
           type="button"
           className="book-more-button"
         >
           <MoreVertical size={16} />
         </button>
-
       </td>
 
     </tr>
   );
 }
-
 
 /* =========================================================
    STATUS
@@ -1174,7 +1168,6 @@ function StatusBadge({
 }: {
   status: "Published" | "Unpublished";
 }) {
-
   return (
     <span
       className={`status-badge ${
@@ -1188,7 +1181,6 @@ function StatusBadge({
   );
 }
 
-
 /* =========================================================
    SUMMARY ITEM
    ========================================================= */
@@ -1200,7 +1192,6 @@ function SummaryItem({
   label: string;
   value: string;
 }) {
-
   return (
     <div className="summary-item">
 
@@ -1215,6 +1206,5 @@ function SummaryItem({
     </div>
   );
 }
-
 
 export default Books;

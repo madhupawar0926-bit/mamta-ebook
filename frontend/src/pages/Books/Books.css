@@ -805,7 +805,7 @@
 
   color: #344054;
 
-  font-size: 9px;
+  font-size: 11px;
 
   font-weight: 600;
 
@@ -821,7 +821,7 @@
 
   color: #475467;
 
-  font-size: 9px;
+  font-size: 10px;
 
   white-space: nowrap;
 }
@@ -941,13 +941,13 @@
 
   gap: 10px;
 
-  color: #667085;
+  color: black;
 
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .summary-item strong {
-  color: #344054;
+  color: #444544;
 
   font-size: 9px;
 
@@ -1170,7 +1170,7 @@
   }
 
   .breadcrumb-item button {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .folder-summary {
@@ -1692,3 +1692,501 @@
   }
 
 }
+
+
+/* =========================================================
+   FINAL BOOKS UX OVERRIDES
+   - Breadcrumb actions
+   - Remove Reorder / Move
+   - Folder/book context details
+   - Summary above content
+   - Mobile + horizontal overflow safe
+   ========================================================= */
+
+.books-page,
+.books-content,
+.books-layout,
+.catalogue-table-card,
+.folder-books-card,
+.selected-item-details,
+.context-summary {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.books-page {
+  overflow-x: hidden;
+}
+
+.breadcrumb-card {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.breadcrumb {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.breadcrumb-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.add-book-button,
+.add-folder-button {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 0 11px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.add-book-button {
+  border: 1px solid #008f5b;
+  background: #008f5b;
+  color: #fff;
+}
+
+.add-folder-button {
+  border: 1px solid #dfe5ea;
+  background: #fff;
+  color: #344054;
+}
+
+.add-book-button:hover {
+  background: #007b4e;
+}
+
+.add-folder-button:hover {
+  border-color: #a9d9c3;
+  background: #f3faf7;
+  color: #008354;
+}
+
+/* Reorder / Move are intentionally removed. */
+.toolbar-actions,
+.outline-action {
+  display: none !important;
+}
+
+/* Selected folder/book details */
+.selected-item-details {
+  width: 100%;
+  min-height: 78px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e4e7ec;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.selected-item-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  border-radius: 8px;
+}
+
+.selected-item-icon.folder {
+  background: #fff6df;
+  color: #f5a623;
+}
+
+.selected-item-icon.book {
+  background: #e5f8ef;
+  color: #008f5b;
+}
+
+.selected-item-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.selected-item-label {
+  display: block;
+  margin-bottom: 3px;
+  color: #98a2b3;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.selected-item-copy h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 14px;
+  line-height: 1.3;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-item-copy p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 9px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-item-meta {
+  flex: 0 0 auto;
+  min-width: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.selected-item-meta span {
+  color: #98a2b3;
+  font-size: 8px;
+}
+
+.selected-item-meta strong {
+  color: #344054;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+/* Summary directly below details */
+.context-summary {
+  width: 100%;
+  margin-top: 12px;
+  padding: 15px;
+  background: #fff;
+  border: 1px solid #e4e7ec;
+  border-radius: 9px;
+}
+
+.context-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.context-summary-header > div {
+  min-width: 0;
+}
+
+.context-summary-header > div > span {
+  display: block;
+  color: #98a2b3;
+  font-size: 8px;
+  margin-bottom: 3px;
+}
+
+.context-summary-header h2 {
+  margin: 0;
+  color: #344054;
+  font-size: 11px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.context-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 20px;
+}
+
+.context-summary-grid .summary-item,
+.context-summary-grid .summary-visibility {
+  min-width: 0;
+  border-top: 1px solid #edf0f2;
+}
+
+.context-summary-grid .summary-item {
+  min-height: 38px;
+}
+
+.context-summary-grid .summary-visibility {
+  min-height: 38px;
+}
+
+.book-table-row {
+  cursor: pointer;
+}
+
+.book-table-row:hover,
+.book-table-row.selected {
+  background: #f3faf7;
+}
+
+.book-table-name {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 7px;
+}
+
+.book-inline-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: #008f5b;
+}
+
+.folder-books-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.folder-books-card .table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.catalogue-table-card .table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.catalogue-table,
+.folder-books-table {
+  table-layout: auto;
+}
+
+.empty-state {
+  white-space: normal !important;
+}
+
+/* Folder section sits above books on desktop and mobile. */
+.books-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 275px;
+  gap: 17px;
+  margin-top: 14px;
+}
+
+/* The new summary is above this lower section. */
+@media (max-width: 900px) {
+  .breadcrumb-card {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .breadcrumb {
+    width: 100%;
+    flex: 0 0 auto;
+    min-height: 30px;
+  }
+
+  .breadcrumb-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .breadcrumb-actions .add-book-button,
+  .breadcrumb-actions .add-folder-button {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .selected-item-details {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .selected-item-copy {
+    flex: 1 1 calc(100% - 55px);
+  }
+
+  .selected-item-meta {
+    flex: 1 1 90px;
+    min-width: 0;
+  }
+
+  .context-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .books-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogue-table-card,
+  .folder-books-card {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .catalogue-table,
+  .folder-books-table {
+    min-width: 760px;
+  }
+}
+
+@media (max-width: 700px) {
+  .books-page {
+    padding: 10px;
+  }
+
+  .breadcrumb-actions {
+    gap: 6px;
+  }
+
+  .add-book-button,
+  .add-folder-button {
+    height: 36px;
+    padding: 0 8px;
+    font-size: 9px;
+  }
+
+  .selected-item-details {
+    padding: 12px;
+    gap: 9px;
+  }
+
+  .selected-item-icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .selected-item-copy h2 {
+    font-size: 12px;
+  }
+
+  .selected-item-copy p {
+    font-size: 8px;
+  }
+
+  .context-summary {
+    padding: 12px;
+  }
+
+  .context-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .context-summary-grid .summary-item,
+  .context-summary-grid .summary-visibility {
+    min-height: 38px;
+  }
+
+  .catalogue-toolbar {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .catalogue-search,
+  .status-filter {
+    width: 100%;
+  }
+
+  .status-filter select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .catalogue-table,
+  .folder-books-table {
+    min-width: 700px;
+  }
+
+  .folder-books-header {
+    min-height: 45px;
+  }
+
+  .folder-books-header h2 {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .books-page {
+    padding: 8px;
+  }
+
+  .breadcrumb-card {
+    border-radius: 8px;
+  }
+
+  .breadcrumb-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .add-book-button,
+  .add-folder-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .selected-item-details {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .selected-item-copy {
+    width: 100%;
+  }
+
+  .selected-item-meta {
+    grid-column: span 1;
+    min-width: 0;
+    padding-top: 4px;
+  }
+
+  .selected-item-details > .status-badge {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .context-summary-header h2 {
+    font-size: 10px;
+  }
+
+  .summary-item,
+  .summary-visibility {
+    font-size: 9px;
+  }
+
+  .catalogue-table,
+  .folder-books-table {
+    min-width: 650px;
+  }
+
+  .empty-state {
+    height: 80px !important;
+  }
+}
+
+/* new cs */

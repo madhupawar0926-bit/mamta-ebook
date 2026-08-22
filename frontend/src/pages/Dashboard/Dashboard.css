@@ -25,6 +25,7 @@
   margin-bottom: 18px;
 }
 
+
 .dashboard-welcome {
   margin: 0;
 
@@ -160,7 +161,8 @@
   color: #101828;
 
   font-size: 12px;
-font-weight:600;
+  font-weight: 600;
+
   white-space: nowrap;
 }
 
@@ -168,7 +170,9 @@ font-weight:600;
   margin: 0;
 
   color: #101828;
-margin-top:8px;
+
+  margin-top: 8px;
+
   font-size: 23px;
   line-height: 1.15;
 
@@ -182,12 +186,14 @@ margin-top:8px;
   align-items: center;
 
   gap: 4px;
-font-weight: 600;
+
+  font-weight: 600;
+
   font-size: 11px;
 }
 
 .stat-change.positive {
-  color:#08b77a;
+  color: #08b77a;
 }
 
 .stat-change.negative {
@@ -205,7 +211,9 @@ font-weight: 600;
   gap: 8px;
 
   color: #475467;
-font-weight: 600;
+
+  font-weight: 600;
+
   font-size: 12px;
 }
 
@@ -341,18 +349,26 @@ font-weight: 600;
 }
 
 .year-select {
-
   display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 6px 10px;
-    border: 1px solid #dfe5ea;
-    border-radius: 7px;
-    background: #ffffff;
-    color: #344054;
-    font-weight: 600;
-    font-size: 12px;
-    cursor: pointer;
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 6px 10px;
+
+  border: 1px solid #dfe5ea;
+
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: #344054;
+
+  font-weight: 600;
+
+  font-size: 12px;
+
+  cursor: pointer;
 }
 
 .chart-arrow {
@@ -360,8 +376,6 @@ font-weight: 600;
   height: 28px;
 
   display: flex;
-  /* align-items: center;
-  justify-content: center; */
 
   border: 0;
 
@@ -445,6 +459,7 @@ font-weight: 600;
 
   left: 0;
   right: 0;
+
   bottom: 29px;
   top: 0;
 
@@ -473,6 +488,7 @@ font-weight: 600;
   height: 220px;
 
   display: flex;
+
   align-items: flex-end;
 
   gap: 4px;
@@ -535,9 +551,9 @@ font-weight: 600;
 }
 
 .chart-summary span {
-      font-weight: 600;
-    color: #475467;
-    font-size: 14px;
+  font-weight: 600;
+  color: #475467;
+  font-size: 14px;
 }
 
 .chart-summary strong {
@@ -575,13 +591,20 @@ font-weight: 600;
 
 .view-all {
   padding: 6px 12px;
-    font-weight: 600;
-    border: 1px solid #dfe5ea;
-    border-radius: 6px;
-    background: #ffffff;
-    color: #344054;
-    font-size: 12px;
-    cursor: pointer;
+
+  font-weight: 600;
+
+  border: 1px solid #dfe5ea;
+
+  border-radius: 6px;
+
+  background: #ffffff;
+
+  color: #344054;
+
+  font-size: 12px;
+
+  cursor: pointer;
 }
 
 .view-all:hover {
@@ -689,8 +712,10 @@ font-weight: 600;
 .book-purchases,
 .book-revenue {
   color: #475467;
-    font-size: 11.5px;
-    text-align: center;
+
+  font-size: 11.5px;
+
+  text-align: center;
 }
 
 .book-revenue {
@@ -721,17 +746,34 @@ font-weight: 600;
 
 .quick-action {
   min-height: 132px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 15px;
-    border: 1px solid #d8eee3;
-    border-radius: 8px;
-    background: linear-gradient(145deg, #f4fbf7, #effaf4);
-    text-align: center !important;
-    cursor: pointer;
-    transition: transform 0.2s ease, border-color 0.2s ease;
+
+  position: relative;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  padding: 15px;
+
+  border: 1px solid #d8eee3;
+
+  border-radius: 8px;
+
+  background: linear-gradient(
+    145deg,
+    #f4fbf7,
+    #effaf4
+  );
+
+  text-align: center !important;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .quick-action:hover {
@@ -745,6 +787,7 @@ font-weight: 600;
   height: 38px;
 
   display: flex;
+
   align-items: center;
   justify-content: center;
 
@@ -762,6 +805,7 @@ font-weight: 600;
   color: #172033;
 
   font-size: 13px;
+
   font-weight: 600;
 }
 
@@ -777,6 +821,7 @@ font-weight: 600;
   position: absolute;
 
   right: 13px;
+
   bottom: 22px;
 
   color: #007c50;
@@ -929,28 +974,36 @@ font-weight: 600;
   .quick-action {
     min-height: 105px;
   }
+
   .stat-content h2 {
     margin: 0;
+
     color: #101828;
+
     margin-top: 1px;
-    font-size: 19px;}
-    stat-change {
-    margin-top: 5px;}
 
+    font-size: 19px;
+  }
 
-    .stat-footer {
-    padding-top: 7px;}
+  .stat-change {
+    margin-top: 5px;
+  }
 
-    stat-icon {
-    width: 50px!important;
-    height: 50px !important;}
+  .stat-footer {
+    padding-top: 7px;
+  }
 
+  .stat-icon {
+    width: 50px !important;
+    height: 50px !important;
+  }
 
-    .stat-card {
-      padding:14px 14px;
-    }
+  .stat-card {
+    padding: 14px 14px;
+  }
 }
-/* new over */
+
+
 /* =========================================================
    BUTTON HOVER EFFECTS
    ========================================================= */
@@ -975,7 +1028,9 @@ font-weight: 600;
 }
 
 
-/* Chart Arrow Buttons */
+/* =========================================================
+   CHART ARROW BUTTONS
+   ========================================================= */
 
 .chart-arrow {
   transition:
@@ -996,7 +1051,9 @@ font-weight: 600;
 }
 
 
-/* View All Button */
+/* =========================================================
+   VIEW ALL BUTTON
+   ========================================================= */
 
 .view-all {
   transition:
@@ -1014,7 +1071,9 @@ font-weight: 600;
 }
 
 
-/* Quick Action Buttons */
+/* =========================================================
+   QUICK ACTION BUTTONS
+   ========================================================= */
 
 .quick-action {
   transition:
@@ -1027,7 +1086,11 @@ font-weight: 600;
 .quick-action:hover {
   transform: translateY(-2px);
   border-color: #a9dcc5;
-  background: linear-gradient(145deg, #f7fcf9, #eefaf4);
+  background: linear-gradient(
+    145deg,
+    #f7fcf9,
+    #eefaf4
+  );
   box-shadow: 0 4px 10px rgba(16, 24, 40, 0.06);
 }
 
@@ -1046,6 +1109,8 @@ font-weight: 600;
 .quick-action-arrow {
   transition: transform 0.2s ease;
 }
+
+
 .dashboard-top {
   position: relative;
   overflow: visible !important;
@@ -1059,9 +1124,11 @@ font-weight: 600;
 .dashboard-date-popper {
   z-index: 99999 !important;
 }
-/* revenue dabird */
+
+
 /* =========================================================
-   CLICKABLE BAR
+   REVENUE CHART HOVER TOOLTIP
+   ONLY REVENUE CHART SECTION CHANGED
    ========================================================= */
 
 .bar-group {
@@ -1069,18 +1136,25 @@ font-weight: 600;
   cursor: pointer;
 }
 
-.bar-group:hover .bar {
-  opacity: 0.8;
+.bar-group:hover {
+  z-index: 100;
 }
 
-.bar-group.selected .bar {
+.bar-group:hover .bar {
+  opacity: 0.85;
+}
+
+.bar-group.hovered {
+  z-index: 100;
+}
+
+.bar-group.hovered .bar {
   opacity: 1;
 }
 
-.bar-group.selected {
-  z-index: 20;
+.bar-group:hover .month {
+  font-weight: 600;
 }
-
 
 /* =========================================================
    CHART VALUE TOOLTIP
@@ -1088,125 +1162,38 @@ font-weight: 600;
 
 .chart-content {
   position: relative;
+  overflow: visible !important;
+}
+
+.chart-area,
+.chart-wrapper,
+.revenue-card,
+.bars {
+  overflow: visible !important;
 }
 
 .chart-value-tooltip {
   position: absolute;
+
   top: 12px;
   left: 50%;
+
   transform: translateX(-50%);
 
-  min-width: 150px;
-  padding: 12px 14px;
+  min-width: 110px;
+font-size:10px;
+  padding: 6px 10px;
 
   background: #ffffff;
+
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-
-  z-index: 100;
-}
-
-.tooltip-month {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-
-  padding-bottom: 8px;
-  margin-bottom: 8px;
-
-  border-bottom: 1px solid #edf0f3;
-}
-
-.tooltip-value {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-
-  font-size: 12px;
-  color: #64748b;
-
-  margin-top: 6px;
-}
-
-.tooltip-value strong {
-  margin-left: auto;
-  font-size: 12px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.tooltip-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.revenue-dot {
-  background: #f59e0b;
-}
-
-.purchase-dot {
-  background: #10b981;
-}
-
-
-/* =========================================================
-   SELECTED MONTH
-   ========================================================= */
-
-.bar-group.selected .month-label {
-  font-weight: 600;
-}
-/* =========================================================
-   CLICKABLE GRAPH BARS
-   ========================================================= */
-
-.bar-group {
-  position: relative;
-  cursor: pointer;
-  outline: none;
-}
-
-.bar-group:hover .bar {
-  opacity: 0.85;
-}
-
-.bar-group.selected {
-  z-index: 100;
-}
-
-.bar-group.selected .bar {
-  opacity: 1;
-}
-
-
-/* =========================================================
-   GRAPH VALUE TOOLTIP
-   ========================================================= */
-
-.chart-value-tooltip {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 10px);
-
-  transform: translateX(-50%);
-
-  min-width: 0px;
-
-  padding: 0px;
-
-  background: #ffffff;
-
-  border: none;
 
   border-radius: 8px;
 
-  
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.12);
 
-  z-index: 0;
+  z-index: 99999;
 
   pointer-events: none;
 
@@ -1219,14 +1206,18 @@ font-weight: 600;
    ========================================================= */
 
 .tooltip-month {
+  display: block;
+
   margin: 0 0 8px;
+
   padding: 0 0 7px;
-display: none;
+
   border-bottom: 1px solid #edf0f2;
 
   color: #101828;
 
   font-size: 11px;
+
   line-height: 1.2;
 
   font-weight: 600;
@@ -1236,11 +1227,12 @@ display: none;
 
 
 /* =========================================================
-   TOOLTIP ROW
+   TOOLTIP VALUE
    ========================================================= */
 
-.tooltip-row {
+.tooltip-value {
   display: flex;
+
   align-items: center;
 
   gap: 7px;
@@ -1249,12 +1241,11 @@ display: none;
 
   color: #667085;
 
-  font-size: 11px;
+  font-size: 9px;
 
-  line-height: 1.2;
 }
 
-.tooltip-row strong {
+.tooltip-value strong {
   margin-left: auto;
 
   color: #101828;
@@ -1271,6 +1262,7 @@ display: none;
 
 .tooltip-dot {
   width: 7px;
+
   height: 7px;
 
   flex-shrink: 0;
@@ -1284,18 +1276,6 @@ display: none;
 
 .purchase-dot {
   background: #12b76a;
-}
-
-
-/* =========================================================
-   PREVENT LAYOUT SHIFT
-   ========================================================= */
-
-.chart-area,
-.chart-wrapper,
-.revenue-card,
-.bars {
-  overflow: visible !important;
 }
 
 
@@ -1329,18 +1309,20 @@ display: none;
 
 
 /* =========================================================
-   MOBILE
+   MOBILE TOOLTIP
    ========================================================= */
 
 @media (max-width: 520px) {
+
   .chart-value-tooltip {
     min-width: 135px;
+
     padding: 8px 10px;
   }
 
   .tooltip-month,
-  .tooltip-row,
-  .tooltip-row strong {
+  .tooltip-value,
+  .tooltip-value strong {
     font-size: 10px;
   }
 }

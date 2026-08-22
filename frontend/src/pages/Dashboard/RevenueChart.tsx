@@ -18,14 +18,15 @@ const chartData = [
 export function RevenueChart() {
   const maxValue = 100;
 
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [hoveredMonth, setHoveredMonth] = useState<string | null>(null);
 
-  const selectedData = chartData.find(
-    (item) => item.month === selectedMonth
+  const hoveredData = chartData.find(
+    (item) => item.month === hoveredMonth
   );
 
   return (
     <section className="dashboard-panel revenue-panel">
+      {/* HEADER */}
       <div className="panel-header chart-header">
         <div>
           <div className="panel-title-row">
@@ -61,6 +62,7 @@ export function RevenueChart() {
         </div>
       </div>
 
+      {/* CHART */}
       <div className="chart-area">
         <div className="chart-y-axis">
           <span>100K</span>
@@ -73,6 +75,7 @@ export function RevenueChart() {
 
         <div className="chart-content">
 
+          {/* GRID */}
           <div className="chart-grid-lines">
             <span />
             <span />
@@ -82,49 +85,67 @@ export function RevenueChart() {
             <span />
           </div>
 
-          {/* SELECTED VALUE TOOLTIP */}
-
-          {selectedData && (
-            <div className="chart-value-tooltip">
+          {/* TOOLTIP */}
+          {hoveredData && (
+            <div
+              className="chart-value-tooltip"
+              style={{
+                pointerEvents: "none",
+              }}
+            >
               <div className="tooltip-month">
-                {selectedData.month}
+                {hoveredData.month}
               </div>
 
               <div className="tooltip-value revenue-value">
                 <span className="tooltip-dot revenue-dot" />
                 <span>Revenue</span>
-                <strong>₹{selectedData.revenue}K</strong>
+                <strong>
+                  ₹{hoveredData.revenue}K
+                </strong>
               </div>
 
               <div className="tooltip-value purchase-value">
                 <span className="tooltip-dot purchase-dot" />
                 <span>Purchases</span>
-                <strong>{selectedData.purchases}</strong>
+                <strong>
+                  {hoveredData.purchases}
+                </strong>
               </div>
             </div>
           )}
 
+          {/* BARS */}
           <div className="bars">
             {chartData.map((item) => {
-              const isSelected =
-                selectedMonth === item.month;
+              const isHovered =
+                hoveredMonth === item.month;
 
               return (
                 <div
-                  className={`bar-group ${
-                    isSelected ? "selected" : ""
-                  }`}
                   key={item.month}
-                  onClick={() => {
-                    setSelectedMonth(
-                      isSelected ? null : item.month
-                    );
+                  className={`bar-group ${
+                    isHovered ? "selected" : ""
+                  }`}
+                  onMouseOver={() => {
+                    setHoveredMonth(item.month);
+                  }}
+                  onMouseOut={(event) => {
+                    const currentTarget = event.currentTarget;
+                    const relatedTarget =
+                      event.relatedTarget as Node | null;
+
+                    if (
+                      !relatedTarget ||
+                      !currentTarget.contains(relatedTarget)
+                    ) {
+                      setHoveredMonth(null);
+                    }
                   }}
                 >
                   <div className="bar-pair">
 
-                    {/* REVENUE BAR */}
-
+                    {/* REVENUE */}
                     <div
                       className="bar revenue-bar"
                       style={{
@@ -134,8 +155,7 @@ export function RevenueChart() {
                       }}
                     />
 
-                    {/* PURCHASE BAR */}
-
+                    {/* PURCHASES */}
                     <div
                       className="bar purchase-bar"
                       style={{
@@ -157,11 +177,10 @@ export function RevenueChart() {
         </div>
       </div>
 
+      {/* SUMMARY */}
       <div className="chart-summary">
         <div>
-          <span>
-            Total Revenue (This Year)
-          </span>
+          <span>Total Revenue (This Year)</span>
 
           <strong>
             ₹4,85,000
@@ -169,9 +188,7 @@ export function RevenueChart() {
         </div>
 
         <div>
-          <span>
-            Total Purchases (This Year)
-          </span>
+          <span>Total Purchases (This Year)</span>
 
           <strong>
             5,420
