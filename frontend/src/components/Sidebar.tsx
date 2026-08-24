@@ -9,9 +9,9 @@ import {
 } from "lucide-react";
 import logo from "../assets/logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
-
+import { ShieldCheck } from "lucide-react";
 import "./Sidebar.css";
-
+import { UserRoundCheck } from "lucide-react";
 interface SidebarProps {
   mobileOpen?: boolean;
   onClose?: () => void;
@@ -102,6 +102,43 @@ export function Sidebar({
             <IndianRupee size={17} strokeWidth={1.8} />
             {!collapsed && <span>Earnings</span>}
           </NavLink>
+         <NavLink
+  to="/securitycontrol"
+  className={({ isActive }) =>
+    `sidebar-link ${isActive ? "active" : ""}`
+  }
+  onClick={onClose}
+  title={collapsed ? "Security Controls" : undefined}
+>
+  <ShieldCheck size={17} strokeWidth={1.8} />
+
+  {!collapsed && (
+    <span>Security Controls</span>
+  )}
+</NavLink>
+
+
+<NavLink
+  to="/"
+  className={({ isActive }) =>
+    `sidebar-link ${isActive ? "active" : ""}`
+  }
+  onClick={onClose}
+  title={
+    collapsed
+      ? "Student Details & Purchase"
+      : undefined
+  }
+>
+  <UserRoundCheck
+    size={17}
+    strokeWidth={1.8}
+  />
+
+  {!collapsed && (
+    <span>Student Details & Purchase</span>
+  )}
+</NavLink>
 
         </nav>
 

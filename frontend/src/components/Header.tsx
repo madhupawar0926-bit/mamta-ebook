@@ -37,7 +37,9 @@ function Header({ onMenuClick }: HeaderProps) {
     if (location.pathname.startsWith("/earnings")) {
       return "Earnings";
     }
-
+ if (location.pathname.startsWith("/securitycontrol")) {
+      return "Security Controls";
+    }
     return "Dashboard";
   };
 

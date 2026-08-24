@@ -9,7 +9,7 @@ import AddNewBook from "./pages/Books/AddNewBook";
 import AddNewFolder from "./pages/Books/AddNewFolder";
 import Earnings from "./pages/Earnings/Earnings";
 import Login from "./pages/Login/Login";
-
+import SecurityControl  from "./pages/SecurityControl/SecurityControl"
 function RequireAuth() {
   return localStorage.getItem("mamta-authenticated") === "true"
     ? <Layout />
@@ -34,6 +34,8 @@ function App() {
 
           {/* Earnings */}
           <Route path="/earnings" element={<Earnings />} />
+
+          <Route path="/securitycontrol" element={<SecurityControl />} />
 
         </Route>
 

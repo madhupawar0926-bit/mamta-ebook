@@ -1,0 +1,310 @@
+.security-controls-page {
+  width: 100%;
+  margin: 0 auto;
+  padding: 28px 30px 40px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.security-page-header {
+  margin-bottom: 25px;
+}
+
+.security-page-header h1 {
+  margin: 0;
+
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+
+  color: #222;
+}
+
+.security-page-header p {
+  margin: 4px 0 0;
+
+  font-size: 13px;
+  line-height: 18px;
+
+  color: #777;
+}
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.security-section {
+  width: 100%;
+  margin-bottom: 25px;
+}
+
+.security-section h2 {
+  margin: 0 0 9px;
+
+  font-size: 14px;
+  line-height: 20px;
+
+  font-weight: 600;
+
+  color: #222;
+}
+
+/* =========================================================
+   SETTINGS LIST
+   ========================================================= */
+
+.security-settings-list {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+/* =========================================================
+   SETTING CARD
+   ========================================================= */
+
+.security-setting-card {
+  width: 100%;
+  min-height: 72px;
+
+  padding: 11px 14px;
+
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+}
+
+/* =========================================================
+   TEXT
+   ========================================================= */
+
+.security-setting-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.security-setting-title {
+  font-size: 13px;
+  line-height: 18px;
+
+  font-weight: 600;
+
+  color: #222;
+}
+
+.security-setting-description {
+  margin-top: 2px;
+
+  max-width: 850px;
+
+  font-size: 12px;
+  line-height: 16px;
+
+  color: #777;
+}
+
+/* =========================================================
+   TOGGLE
+   ========================================================= */
+
+.security-toggle {
+  position: relative;
+
+  flex: 0 0 auto;
+
+  width: 40px;
+  height: 22px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 20px;
+
+  background: #dedede;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+/* WHITE CIRCLE */
+
+.security-toggle-circle {
+  position: absolute;
+
+  top: 3px;
+  left: 3px;
+
+  width: 16px;
+  height: 16px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+/* =========================================================
+   ACTIVE / ON
+   Screenshot-style:
+   Grey track + Green circle on right
+   ========================================================= */
+
+.security-toggle.active {
+  background: #dedede;
+}
+
+.security-toggle.active
+  .security-toggle-circle {
+  transform: translateX(18px);
+
+  background: #08c765;
+}
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.security-toggle:focus-visible {
+  outline: 2px solid #08c765;
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   UPDATE BUTTON
+   ========================================================= */
+
+.security-update-wrapper {
+  width: 100%;
+
+  margin-top: 5px;
+
+  display: flex;
+  justify-content: flex-end;
+}
+
+.security-update-button {
+  height: 40px;
+
+  padding: 0 24px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #087f43;
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.security-update-button:hover {
+  background: #066c39;
+}
+
+.security-update-button:active {
+  transform: translateY(1px);
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .security-controls-page {
+    padding: 24px 20px 35px;
+  }
+
+  .security-page-header h1 {
+    font-size: 22px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+  .security-controls-page {
+    padding: 20px 14px 30px;
+  }
+
+  .security-page-header {
+    margin-bottom: 20px;
+  }
+
+  .security-page-header h1 {
+    font-size: 19px;
+    line-height: 24px;
+  }
+
+  .security-page-header p {
+    font-size: 12px;
+  }
+
+  .security-section {
+    margin-bottom: 21px;
+  }
+
+  .security-section h2 {
+    font-size: 13px;
+  }
+
+  .security-setting-card {
+    min-height: 68px;
+
+    padding: 10px 12px;
+
+    gap: 12px;
+  }
+
+  .security-setting-title {
+    font-size: 12px;
+    line-height: 17px;
+  }
+
+  .security-setting-description {
+    font-size: 11px;
+    line-height: 15px;
+  }
+
+  .security-toggle {
+    width: 40px;
+    min-width: 40px;
+    height: 22px;
+  }
+
+  .security-update-wrapper {
+    justify-content: stretch;
+  }
+
+  .security-update-button {
+    width: 100%;
+  }
+}

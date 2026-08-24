@@ -5,11 +5,11 @@ import {
   IndianRupee,
   TrendingUp,
   TrendingDown,
-  CalendarDays,
+  // CalendarDays,
 } from "lucide-react";
 
 import { useState } from "react";
-import DatePicker from "react-datepicker";
+// import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./Dashboard.css";
 
@@ -179,15 +179,15 @@ export function Dashboard() {
      DATE FORMATTER
      ========================================================= */
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return "";
+  // const formatDate = (date: Date | null) => {
+  //   if (!date) return "";
 
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
+  //   return date.toLocaleDateString("en-GB", {
+  //     day: "2-digit",
+  //     month: "short",
+  //     year: "numeric",
+  //   });
+  // };
 
   return (
     <div className="dashboard-page">
