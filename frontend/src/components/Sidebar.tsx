@@ -119,7 +119,7 @@ export function Sidebar({
 
 
 <NavLink
-  to="/"
+  to="/studentdetail"
   className={({ isActive }) =>
     `sidebar-link ${isActive ? "active" : ""}`
   }
