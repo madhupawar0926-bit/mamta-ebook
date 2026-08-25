@@ -456,7 +456,7 @@ font-weight: 600;
 @media (max-width: 768px) {
 
   .sidebar {
-    width: 136px;
+    width: 150px;
 
     transform: translateX(-100%);
 
@@ -620,7 +620,7 @@ font-weight: 600;
 @media (max-width: 420px) {
 
   .sidebar {
-    width: 136px;
+    width: 150px;
   }
 
   .sidebar-account-box {
