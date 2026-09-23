@@ -31,7 +31,7 @@ function Header({ onMenuClick }: HeaderProps) {
     }
 
     if (location.pathname.startsWith("/category")) {
-      return "Books";
+      return "Categories & Book Management";
     }
 
     if (location.pathname.startsWith("/earnings")) {

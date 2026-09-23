@@ -6,13 +6,16 @@ import {
   ChevronRight,
   Mail,
   MoreVertical,
+  Laptop,
   Phone,
   Search,
   Shield,
   ShoppingCart,
+  Smartphone,
   UserRound,
   UsersRound,
   WalletCards,
+  X,
 } from "lucide-react";
 
 import { useMemo, useState } from "react";
@@ -42,6 +45,13 @@ type PurchasedBook = {
   date: string;
   price: string;
   image: string;
+};
+
+type LoginDevice = {
+  name: string;
+  details: string;
+  lastActive: string;
+  icon: typeof Laptop;
 };
 
 /* =========================================================
@@ -198,6 +208,21 @@ const purchasedBooks: PurchasedBook[] = [
   },
 ];
 
+const loginDevices: LoginDevice[] = [
+  {
+    name: "Chrome on Windows",
+    details: "Windows 11 · Chrome",
+    lastActive: "Active now",
+    icon: Laptop,
+  },
+  {
+    name: "Mamta eBook App",
+    details: "Android device",
+    lastActive: "Last active today",
+    icon: Smartphone,
+  },
+];
+
 /* =========================================================
    AVATAR COLORS
 ========================================================= */
@@ -218,6 +243,7 @@ const avatarClasses = [
 
 export default function StudentDetails() {
   const [selectedStudentId, setSelectedStudentId] = useState(1);
+  const [isDevicesModalOpen, setIsDevicesModalOpen] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState<
     "All Status" | StudentStatus
@@ -699,13 +725,7 @@ export default function StudentDetails() {
               </strong>
             </div>
 
-            <div className="profile-info-row">
-              <span>Last Active</span>
-
-              <strong>
-                {selectedStudent.lastActive}
-              </strong>
-            </div>
+            
 
             <div className="profile-info-row">
               <span>Account Status</span>
@@ -731,6 +751,31 @@ export default function StudentDetails() {
               </strong>
             </div>
           </div>
+
+          {/* LOGIN DEVICES */}
+
+          <section className="login-devices-section">
+            <div className="login-devices-heading">
+              <div>
+                <Laptop size={16} />
+                <h3>Login Devices</h3>
+              </div>
+
+              <span>{loginDevices.length} / 2</span>
+            </div>
+
+            <p className="login-devices-limit">
+              Maximum 2 devices can be logged in at once.
+            </p>
+
+            <button
+              type="button"
+              className="view-devices-button"
+              onClick={() => setIsDevicesModalOpen(true)}
+            >
+              View device details
+            </button>
+          </section>
 
           {/* SECURITY ALERT */}
 
@@ -802,6 +847,59 @@ export default function StudentDetails() {
           </div>
         </aside>
       </section>
+
+      {isDevicesModalOpen && (
+        <div className="devices-modal-backdrop" role="presentation">
+          <div
+            className="devices-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="login-devices-title"
+          >
+            <div className="devices-modal-header">
+              <div>
+                <span className="devices-modal-eyebrow">
+                  {selectedStudent.name}
+                </span>
+                <h2 id="login-devices-title">Login Devices</h2>
+              </div>
+
+              <button
+                type="button"
+                className="devices-modal-close"
+                onClick={() => setIsDevicesModalOpen(false)}
+                aria-label="Close login devices dialog"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="devices-modal-description">
+              {loginDevices.length} of 2 allowed devices are currently logged in.
+            </p>
+
+            <div className="login-device-list">
+              {loginDevices.slice(0, 2).map((device) => {
+                const DeviceIcon = device.icon;
+
+                return (
+                  <div className="login-device-card" key={device.name}>
+                    <div className="login-device-icon">
+                      <DeviceIcon size={18} />
+                    </div>
+
+                    <div className="login-device-content">
+                      <strong>{device.name}</strong>
+                      <span>{device.details}</span>
+                      <small>{device.lastActive}</small>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -172,7 +172,6 @@ export default function AddNewBook() {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [isbn, setIsbn] = useState("");
-  const [publisher, setPublisher] = useState("");
   const [price, setPrice] = useState("");
   const [language, setLanguage] = useState("English");
   const [description, setDescription] = useState("");
@@ -261,7 +260,7 @@ export default function AddNewBook() {
 
     // Simulate save — replace with real API call
     console.log("Saving book", {
-      title, author, isbn, publisher, price,
+      title, author, isbn, price,
       language, description, tags,
       coverFile, pdfFile,
       allowPreview, previewPages,
@@ -383,19 +382,7 @@ export default function AddNewBook() {
                 />
               </div>
 
-              {/* PUBLISHER */}
-              <div className="form-field">
-                <label>
-                  Publisher
-                  <small>(Optional)</small>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. D.C. Pandey Publications"
-                  value={publisher}
-                  onChange={(e) => setPublisher(e.target.value)}
-                />
-              </div>
+            
 
               {/* PRICE */}
               <div className="form-field">
@@ -471,15 +458,20 @@ export default function AddNewBook() {
               {/* TAGS */}
               <div className="form-field full">
                 <label>
-                  Tags / Keywords
-                  <small>(Optional)</small>
+                  Book length
+                  <small>(Page Count)</small>
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. physics, class 11, cbse, textbook"
+                  placeholder="Enter number of pages"
                   value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                />
+ onChange={(e) => {
+      const value = e.target.value;
+
+      if (/^\d*$/.test(value)) {
+        setTags(value);
+      }
+    }}                />
               </div>
 
             </div>
@@ -572,10 +564,7 @@ export default function AddNewBook() {
                 <Toggle value={published} onChange={setPublished} />
               </div>
 
-              <div className="setting-row">
-                <span>Recommended Book</span>
-                <Toggle value={recommended} onChange={setRecommended} />
-              </div>
+              
             </section>
 
           </div>

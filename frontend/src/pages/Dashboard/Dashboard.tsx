@@ -154,6 +154,7 @@ const topBooks = [
 export function Dashboard() {
   const [chartPeriod, setChartPeriod] =
     useState<keyof typeof chartDataByPeriod>("Monthly");
+  const [selectedYear, setSelectedYear] = useState("2026");
 
   /* =========================================================
      HOVERED GRAPH BAR
@@ -170,7 +171,11 @@ export function Dashboard() {
 
 
   const activeChartData =
-    chartDataByPeriod[chartPeriod];
+    chartPeriod === "Yearly"
+      ? chartDataByPeriod.Yearly.filter(
+          (item) => item.month === selectedYear
+        )
+      : chartDataByPeriod[chartPeriod];
 
   const activeSummary =
     chartSummary[chartPeriod];
@@ -247,7 +252,7 @@ export function Dashboard() {
                     {stat.value}
                   </h2>
 
-                  <div
+                  {/* <div
                     className={`stat-change ${
                       stat.positive
                         ? "positive"
@@ -265,7 +270,7 @@ export function Dashboard() {
                       {stat.change}
                     </span>
 
-                  </div>
+                  </div> */}
 
                 </div>
 
@@ -360,6 +365,24 @@ export function Dashboard() {
                 </option>
 
               </select>
+
+              {chartPeriod === "Yearly" && (
+                <select
+                  className="year-select year-value-select"
+                  value={selectedYear}
+                  onChange={(e) => {
+                    setSelectedYear(e.target.value);
+                    setHoveredChartMonth(null);
+                  }}
+                  aria-label="Select year"
+                >
+                  {chartDataByPeriod.Yearly.map((item) => (
+                    <option value={item.month} key={item.month}>
+                      {item.month}
+                    </option>
+                  ))}
+                </select>
+              )}
 
               <button
                 type="button"
