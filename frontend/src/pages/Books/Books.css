@@ -1803,6 +1803,8 @@
   border: 1px solid #dfe5ea;
   background: #fff;
   color: #344054;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .add-book-button:hover {
@@ -1813,6 +1815,175 @@
   border-color: #a9d9c3;
   background: #f3faf7;
   color: #008354;
+}
+
+/* =========================================================
+   CREATE CATEGORY MODAL
+========================================================= */
+
+.create-category-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(20, 28, 25, 0.52);
+}
+
+.create-category-modal {
+  width: min(100%, 560px);
+  padding: 28px 32px 32px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 20px 55px rgba(16, 24, 40, 0.24);
+}
+
+.create-category-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.create-category-modal-header h2 {
+  margin: 0;
+  color: #009b63;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.create-category-modal-header p {
+  margin: 6px 0 0;
+  color: #7c8581;
+  font-size: 12px;
+}
+
+.create-category-close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #969d9a;
+  cursor: pointer;
+}
+
+.create-category-close:hover {
+  color: #344054;
+}
+
+.create-category-field {
+  display: grid;
+  gap: 10px;
+  color: #17233c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.create-category-field input {
+  width: 100%;
+  height: 58px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border: 1px solid #dfe5e2;
+  border-radius: 10px;
+  outline: none;
+  color: #344054;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.create-category-field input::placeholder {
+  color: #6f747d;
+}
+
+.create-category-field input:focus {
+  border-color: #12a878;
+  box-shadow: 0 0 0 3px rgba(18, 168, 120, 0.12);
+}
+
+.create-category-error {
+  margin: 7px 0 0;
+  color: #c43d36;
+  font-size: 11px;
+}
+
+.create-category-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 32px;
+}
+
+.create-category-actions button {
+  height: 52px;
+  border: 0;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.create-category-cancel {
+  color: #5f6268;
+  background: #e8e8e8;
+}
+
+.create-category-submit {
+  color: #fff;
+  background: #138b2d;
+}
+
+.create-category-cancel:hover {
+  background: #dedede;
+}
+
+.create-category-submit:hover {
+  background: #0f7626;
+}
+
+@media (max-width: 600px) {
+  .create-category-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .create-category-modal {
+    width: 100%;
+    padding: 26px 32px 40px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .create-category-modal::before {
+    content: "";
+    display: block;
+    width: 68px;
+    height: 3px;
+    margin: -11px auto 24px;
+    border-radius: 4px;
+    background: #a6aaa8;
+  }
+
+  .create-category-modal-header {
+    margin-bottom: 30px;
+  }
+
+  .create-category-modal-header h2 {
+    font-size: 20px;
+  }
+
+  .create-category-actions {
+    gap: 18px;
+  }
 }
 
 /* Reorder / Move are intentionally removed. */

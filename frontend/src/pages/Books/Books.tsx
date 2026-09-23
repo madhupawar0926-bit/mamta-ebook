@@ -335,6 +335,7 @@ export function Books() {
   const navigate = useNavigate();
   const {
     root: rootFolder,
+    addFolder,
     deleteFolder,
   } = useBooksContext();
 
@@ -360,6 +361,15 @@ export function Books() {
 
   const [mobileTreeOpen, setMobileTreeOpen] =
     useState(false);
+
+  const [isCreateCategoryOpen, setIsCreateCategoryOpen] =
+    useState(false);
+
+  const [categoryName, setCategoryName] =
+    useState("");
+
+  const [categoryError, setCategoryError] =
+    useState("");
 
   /* =======================================================
      SELECTED FOLDER
@@ -503,6 +513,48 @@ export function Books() {
     if (selectedFolderId === id || path?.some((item) => item.id === selectedFolderId)) {
       setSelectedFolderId(parent.id);
     }
+  };
+
+  const openCreateCategory = () => {
+    setCategoryName("");
+    setCategoryError("");
+    setIsCreateCategoryOpen(true);
+  };
+
+  const closeCreateCategory = () => {
+    setIsCreateCategoryOpen(false);
+    setCategoryName("");
+    setCategoryError("");
+  };
+
+  const createCategory = () => {
+    const name = categoryName.trim();
+
+    if (!name) {
+      setCategoryError("Category name is required.");
+      return;
+    }
+
+    const formattedDate = new Date().toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
+    addFolder(selectedFolderId, {
+      id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
+      name,
+      type: "folder",
+      status: "Published",
+      sortOrder: (selectedFolder.children?.length ?? 0) + 1,
+      updatedAt: formattedDate,
+      children: [],
+    });
+
+    setExpandedIds((previous) =>
+      new Set(previous).add(selectedFolderId)
+    );
+    closeCreateCategory();
   };
 
   /* =======================================================
@@ -716,13 +768,14 @@ export function Books() {
                     )}
 
                     {showFolder && (
-                      <Link
-                        to={`/category/folders/new?parentId=${selectedFolderId}`}
+                      <button
+                        type="button"
+                        onClick={openCreateCategory}
                         className="add-folder-button"
                       >
                         <Plus size={17} />
-                        Add Folder
-                      </Link>
+                        Add New Category
+                      </button>
                     )}
                   </>
                 );
@@ -1141,6 +1194,78 @@ export function Books() {
 
         </main>
       </div>
+
+      {isCreateCategoryOpen && (
+        <div
+          className="create-category-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeCreateCategory();
+            }
+          }}
+        >
+          <div
+            className="create-category-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-category-title"
+          >
+            <div className="create-category-modal-header">
+              <div>
+                <h2 id="create-category-title">Create New Category</h2>
+                <p>Note : This will create a Top-level category.</p>
+              </div>
+
+              <button
+                type="button"
+                className="create-category-close"
+                onClick={closeCreateCategory}
+                aria-label="Close create category modal"
+              >
+                <X size={27} />
+              </button>
+            </div>
+
+            <label className="create-category-field">
+              Category Name
+              <input
+                type="text"
+                value={categoryName}
+                onChange={(event) => {
+                  setCategoryName(event.target.value);
+                  setCategoryError("");
+                }}
+                placeholder="Enter category name"
+                autoFocus
+              />
+            </label>
+
+            {categoryError && (
+              <p className="create-category-error" role="alert">
+                {categoryError}
+              </p>
+            )}
+
+            <div className="create-category-actions">
+              <button
+                type="button"
+                className="create-category-cancel"
+                onClick={closeCreateCategory}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="create-category-submit"
+                onClick={createCategory}
+              >
+                Create category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
