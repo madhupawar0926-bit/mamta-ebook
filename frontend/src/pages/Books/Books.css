@@ -1793,6 +1793,12 @@
   white-space: nowrap;
 }
 
+.category-data-status {
+  margin: 0 0 12px;
+  color: #64748b;
+  font-size: 11px;
+}
+
 .add-book-button {
   border: 1px solid #008f5b;
   background: #008f5b;

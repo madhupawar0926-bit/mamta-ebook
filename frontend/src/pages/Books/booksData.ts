@@ -8,6 +8,19 @@ export type Book = {
   status: "Published" | "Unpublished";
   updatedAt: string;
   image: string;
+  categoryId?: string;
+  categoryPath?: string;
+  isbn?: string;
+  language?: string;
+  description?: string;
+  tags?: string;
+  allowPreview?: boolean;
+  previewPages?: number;
+  featured?: boolean;
+  recommended?: boolean;
+  published?: boolean;
+  coverFileName?: string;
+  pdfFileName?: string;
 };
 
 export type BookFolder = {
@@ -15,6 +28,7 @@ export type BookFolder = {
   name: string;
   type: "folder";
   status: "Published" | "Unpublished";
+  visibility?: "published" | "draft";
   sortOrder: number;
   updatedAt: string;
 

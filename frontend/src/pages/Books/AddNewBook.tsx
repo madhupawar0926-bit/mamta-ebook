@@ -9,7 +9,9 @@ import {
 } from "lucide-react";
 
 import { useRef, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+import { useBooksContext } from "../../context/BooksContextValue";
 
 import "./AddNewBook.css";
 
@@ -164,6 +166,9 @@ const MAX_DESC = 500;
 
 export default function AddNewBook() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { root, addBook } = useBooksContext();
+  const categoryId = searchParams.get("categoryId") ?? "";
 
   /* -------------------------------------------------------
      FORM STATE
@@ -188,11 +193,12 @@ export default function AddNewBook() {
   const [previewPages, setPreviewPages] = useState(10);
   const [featured, setFeatured] = useState(false);
   const [published, setPublished] = useState(true);
-  const [recommended, setRecommended] = useState(false);
+  const [recommended] = useState(false);
 
   /* ui */
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   /* -------------------------------------------------------
      COVER UPLOAD
@@ -245,7 +251,7 @@ export default function AddNewBook() {
      SUBMIT
   ------------------------------------------------------- */
 
-  const handleSave = (isDraft = false) => {
+  const handleSave = async (isDraft = false) => {
     const e = validate();
 
     if (!isDraft && Object.keys(e).length > 0) {
@@ -256,21 +262,43 @@ export default function AddNewBook() {
       return;
     }
 
+    if (!categoryId) {
+      setSaveError("Select a category from the Category page before saving.");
+      return;
+    }
+
+    setSaveError("");
     setSubmitted(true);
 
-    // Simulate save — replace with real API call
-    console.log("Saving book", {
-      title, author, isbn, price,
-      language, description, tags,
-      coverFile, pdfFile,
-      allowPreview, previewPages,
-      featured, published, recommended,
-      isDraft,
-    });
-
-    setTimeout(() => {
-      navigate("/category");
-    }, 800);
+    try {
+      await addBook({
+        title,
+        author,
+        isbn,
+        price: Number(price),
+        language,
+        description,
+        tags,
+        allowPreview,
+        previewPages,
+        featured,
+        published: isDraft ? false : published,
+        recommended,
+        coverFileName: coverFile?.name ?? "",
+        pdfFileName: pdfFile?.name ?? "",
+        categoryId,
+      });
+      navigate(`/category?selectedId=${encodeURIComponent(categoryId)}`);
+    } catch (saveErrorValue) {
+      console.error("Failed to save book", saveErrorValue);
+      setSaveError(
+        saveErrorValue instanceof Error &&
+        saveErrorValue.message === "Select a valid category before saving the book."
+          ? saveErrorValue.message
+          : "Unable to save the book. Please try again."
+      );
+      setSubmitted(false);
+    }
   };
 
   /* -------------------------------------------------------
@@ -287,6 +315,17 @@ export default function AddNewBook() {
   ];
 
   const allDone = requiredFields.every((f) => f.done);
+  const selectedCategory = (() => {
+    const findCategory = (folder: typeof root): typeof root | null => {
+      if (folder.id === categoryId) return folder;
+      for (const child of folder.children ?? []) {
+        const result = findCategory(child);
+        if (result) return result;
+      }
+      return null;
+    };
+    return findCategory(root);
+  })();
 
   /* -------------------------------------------------------
      RENDER
@@ -311,6 +350,8 @@ export default function AddNewBook() {
           <strong>Add New Book</strong>
         </div>
       </div>
+
+      {saveError && <p className="field-error" role="alert">{saveError}</p>}
 
 
       <div className="add-book-layout">
@@ -619,7 +660,7 @@ export default function AddNewBook() {
             </div>
 
             <span className="info-label">Folder Path</span>
-            <p>Home › School Books › CBSE › Class 11 › Science</p>
+            <p>{selectedCategory?.name ?? "No category selected"}</p>
 
             <div className="info-row">
               <span>Subfolders</span>

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
   ChevronRight,
@@ -104,6 +105,42 @@ type FolderType =
   | "has-folders"
   | "has-books"
   | "empty";
+
+type CategoryStatusFilter = "All" | "Published" | "Draft";
+
+function filterFolderTree(
+  folder: BookFolder,
+  searchValue: string,
+  statusFilter: CategoryStatusFilter
+): BookFolder | null {
+  const matchesSearch =
+    !searchValue || folder.name.toLowerCase().includes(searchValue);
+  const matchesStatus =
+    statusFilter === "All" ||
+    (statusFilter === "Published" && folder.visibility !== "draft") ||
+    (statusFilter === "Draft" && folder.visibility === "draft");
+  const books = (folder.books ?? []).filter((book) => {
+    const matchesBookSearch =
+      !searchValue ||
+      `${book.title} ${book.author} ${book.code}`
+        .toLowerCase()
+        .includes(searchValue);
+    const matchesBookStatus =
+      statusFilter === "All" ||
+      (statusFilter === "Published" && book.status === "Published") ||
+      (statusFilter === "Draft" && book.status === "Unpublished");
+    return matchesBookSearch && matchesBookStatus;
+  });
+  const children = (folder.children ?? [])
+    .map((child) => filterFolderTree(child, searchValue, statusFilter))
+    .filter((child): child is BookFolder => child !== null);
+
+  if (folder.id === "root" || (matchesSearch && matchesStatus) || children.length > 0 || books.length > 0) {
+    return { ...folder, children, books };
+  }
+
+  return null;
+}
 
 function getFolderType(
   folder: BookFolder
@@ -333,14 +370,17 @@ function TreeNode({
 
 export function Books() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     root: rootFolder,
     addFolder,
     deleteFolder,
+    isLoading: isCategoriesLoading,
+    error: categoriesError,
   } = useBooksContext();
 
   const [selectedFolderId, setSelectedFolderId] =
-    useState("science");
+    useState(searchParams.get("selectedId") ?? "root");
 
   const [expandedIds, setExpandedIds] =
     useState<Set<string>>(
@@ -357,7 +397,7 @@ export function Books() {
     useState("");
 
   const [statusFilter, setStatusFilter] =
-    useState("All");
+    useState<CategoryStatusFilter>("All");
 
   const [mobileTreeOpen, setMobileTreeOpen] =
     useState(false);
@@ -371,6 +411,9 @@ export function Books() {
   const [categoryError, setCategoryError] =
     useState("");
 
+  const [isSavingCategory, setIsSavingCategory] =
+    useState(false);
+
   /* =======================================================
      SELECTED FOLDER
      ======================================================= */
@@ -382,7 +425,7 @@ export function Books() {
         selectedFolderId
       ) ?? rootFolder
     );
-  }, [selectedFolderId]);
+  }, [rootFolder, selectedFolderId]);
 
   /* =======================================================
      BREADCRUMB
@@ -395,7 +438,17 @@ export function Books() {
         selectedFolderId
       ) ?? [rootFolder]
     );
-  }, [selectedFolderId]);
+  }, [rootFolder, selectedFolderId]);
+
+  const visibleRoot = useMemo(
+    () =>
+      filterFolderTree(
+        rootFolder,
+        search.trim().toLowerCase(),
+        statusFilter
+      ) ?? { ...rootFolder, children: [] },
+    [rootFolder, search, statusFilter]
+  );
 
   /* =======================================================
      FOLDER FILTER
@@ -527,7 +580,7 @@ export function Books() {
     setCategoryError("");
   };
 
-  const createCategory = () => {
+  const createCategory = async () => {
     const name = categoryName.trim();
 
     if (!name) {
@@ -535,26 +588,41 @@ export function Books() {
       return;
     }
 
+    setIsSavingCategory(true);
+    setCategoryError("");
+
     const formattedDate = new Date().toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
 
-    addFolder(selectedFolderId, {
-      id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
-      name,
-      type: "folder",
-      status: "Published",
-      sortOrder: (selectedFolder.children?.length ?? 0) + 1,
-      updatedAt: formattedDate,
-      children: [],
-    });
+    try {
+      await addFolder(selectedFolderId, {
+        id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
+        name,
+        type: "folder",
+        status: "Published",
+        visibility: "published",
+        sortOrder: (selectedFolder.children?.length ?? 0) + 1,
+        updatedAt: formattedDate,
+        children: [],
+      });
 
-    setExpandedIds((previous) =>
-      new Set(previous).add(selectedFolderId)
-    );
-    closeCreateCategory();
+      setExpandedIds((previous) =>
+        new Set(previous).add(selectedFolderId)
+      );
+      closeCreateCategory();
+    } catch (createError) {
+      console.error("Failed to create category", createError);
+      setCategoryError(
+        createError instanceof Error
+          ? createError.message
+          : "Unable to create category. Please try again."
+      );
+    } finally {
+      setIsSavingCategory(false);
+    }
   };
 
   /* =======================================================
@@ -598,6 +666,12 @@ export function Books() {
 
         <div className="books-header-actions-placeholder" />
       </div>
+
+      {(isCategoriesLoading || categoriesError) && (
+        <div className="category-data-status" role={categoriesError ? "alert" : undefined}>
+          {isCategoriesLoading ? "Loading categories..." : categoriesError}
+        </div>
+      )}
 
       {/* ===================================================
           TABS
@@ -652,7 +726,7 @@ export function Books() {
 
           <div className="catalogue-tree">
             <TreeNode
-              folder={rootFolder}
+              folder={visibleRoot}
               level={0}
               selectedId={selectedFolderId}
               expandedIds={expandedIds}
@@ -759,7 +833,7 @@ export function Books() {
                   <>
                     {showBook && (
                       <Link
-                        to="/category/addnewbook"
+                        to={`/category/addnewbook?categoryId=${encodeURIComponent(selectedFolderId)}`}
                         className="add-book-button"
                       >
                         <Plus size={17} />
@@ -823,7 +897,7 @@ export function Books() {
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(
-                    event.target.value
+                    event.target.value as CategoryStatusFilter
                   )
                 }
               >
@@ -835,8 +909,8 @@ export function Books() {
                   Published
                 </option>
 
-                <option value="Unpublished">
-                  Unpublished
+                <option value="Draft">
+                  Draft
                 </option>
               </select>
 
@@ -1184,9 +1258,7 @@ export function Books() {
                 </span>
 
                 <StatusBadge
-                  status={
-                    selectedFolder.status
-                  }
+                  status={selectedFolder.visibility === "draft" ? "Draft" : "Published"}
                 />
               </div>
             </aside>
@@ -1259,8 +1331,9 @@ export function Books() {
                 type="button"
                 className="create-category-submit"
                 onClick={createCategory}
+                disabled={isSavingCategory}
               >
-                Create category
+                {isSavingCategory ? "Creating..." : "Create category"}
               </button>
             </div>
           </div>
@@ -1354,7 +1427,7 @@ function BookRow({
 function StatusBadge({
   status,
 }: {
-  status: "Published" | "Unpublished";
+  status: "Published" | "Unpublished" | "Draft";
 }) {
   return (
     <span
