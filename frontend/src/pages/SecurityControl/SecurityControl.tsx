@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LockKeyhole, X } from "lucide-react";
 
 import "./SecurityControl.css";
 
@@ -11,6 +12,7 @@ type SecuritySetting = {
   title: string;
   description: string;
   toggle?: boolean;
+  locked?: boolean;
 };
 
 type SecuritySettings = {
@@ -40,8 +42,7 @@ export default function SecurityControls() {
      TOGGLE STATES
   ======================================================= */
 
-  const [settings, setSettings] =
-    useState<SecuritySettings>({
+  const initialSettings: SecuritySettings = {
       disablePdfDownload: true,
       disableSharing: true,
       disableExport: true,
@@ -59,7 +60,17 @@ export default function SecurityControls() {
       showTimestamp: true,
       rotateWatermark: true,
       repeatWatermark: true,
-    });
+  };
+
+  const [settings, setSettings] = useState<SecuritySettings>(initialSettings);
+  const [savedSettings, setSavedSettings] =
+    useState<SecuritySettings>(initialSettings);
+  const [isVerificationOpen, setIsVerificationOpen] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+
+  const hasChanges =
+    JSON.stringify(settings) !== JSON.stringify(savedSettings);
 
   /* =======================================================
      TOGGLE HANDLER
@@ -68,6 +79,24 @@ export default function SecurityControls() {
   const handleToggle = (
     id: keyof SecuritySettings
   ) => {
+    if (id === "enableDynamicWatermark") {
+      setSettings((prev) => ({
+        ...prev,
+        enableDynamicWatermark: !prev.enableDynamicWatermark,
+        ...(prev.enableDynamicWatermark
+          ? {
+              showUserId: false,
+              showBookId: false,
+              showSessionId: false,
+              showTimestamp: false,
+              rotateWatermark: false,
+              repeatWatermark: false,
+            }
+          : {}),
+      }));
+      return;
+    }
+
     setSettings((prev) => ({
       ...prev,
       [id]: !prev[id],
@@ -112,6 +141,7 @@ export default function SecurityControls() {
       description:
         "Prevents users from directly downloading the original PDF file to their device.",
       toggle: true,
+      locked: true,
     },
     {
       id: "disableSharing",
@@ -119,6 +149,7 @@ export default function SecurityControls() {
       description:
         "Prevents users from sharing the eBook or its PDF file with other users or applications.",
       toggle: true,
+      locked: true,
     },
     {
       id: "disableExport",
@@ -126,6 +157,7 @@ export default function SecurityControls() {
       description:
         "Prevents book content from being exported outside the application.",
       toggle: true,
+      locked: true,
     },
     {
       id: "disablePrinting",
@@ -133,6 +165,7 @@ export default function SecurityControls() {
       description:
         "Blocks users from printing the eBook or sending it to supported printing services.",
       toggle: true,
+      locked: true,
     },
     {
       id: "disableTextSelection",
@@ -242,29 +275,43 @@ export default function SecurityControls() {
         </div>
 
         {setting.toggle && (
-          <button
-            type="button"
-            className={`security-toggle ${
-              settings[
-                setting.id as keyof SecuritySettings
-              ]
-                ? "active"
-                : ""
-            }`}
-            onClick={() =>
-              handleToggle(
-                setting.id as keyof SecuritySettings
-              )
-            }
-            aria-label={`Toggle ${setting.title}`}
-            aria-pressed={
-              settings[
-                setting.id as keyof SecuritySettings
-              ]
-            }
-          >
-            <span className="security-toggle-circle" />
-          </button>
+          <div className="security-setting-actions">
+            {setting.locked && (
+              <LockKeyhole
+                className="security-lock-icon"
+                size={20}
+                aria-label="Locked security setting"
+              />
+            )}
+            <button
+              type="button"
+              className={`security-toggle ${
+                settings[
+                  setting.id as keyof SecuritySettings
+                ]
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() =>
+                handleToggle(
+                  setting.id as keyof SecuritySettings
+                )
+              }
+              disabled={
+                setting.locked ||
+                (setting.id !== "enableDynamicWatermark" &&
+                  !settings.enableDynamicWatermark)
+              }
+              aria-label={`Toggle ${setting.title}`}
+              aria-pressed={
+                settings[
+                  setting.id as keyof SecuritySettings
+                ]
+              }
+            >
+              <span className="security-toggle-circle" />
+            </button>
+          </div>
         )}
       </div>
     );
@@ -275,12 +322,22 @@ export default function SecurityControls() {
   ======================================================= */
 
   const handleUpdate = () => {
-    console.log(
-      "Updated Security Settings:",
-      settings
-    );
+    if (!hasChanges) return;
+    setOtp("");
+    setOtpError("");
+    setIsVerificationOpen(true);
+  };
 
-    // API call can be added here later.
+  const handleVerification = () => {
+    if (otp !== "123456") {
+      setOtpError("Enter the correct 6-digit verification code.");
+      return;
+    }
+
+    setSavedSettings(settings);
+    setIsVerificationOpen(false);
+    setOtp("");
+    setOtpError("");
   };
 
   /* =======================================================
@@ -367,10 +424,57 @@ export default function SecurityControls() {
           type="button"
           className="security-update-button"
           onClick={handleUpdate}
+          disabled={!hasChanges}
         >
           Update Security Settings
         </button>
       </div>
+
+      {isVerificationOpen && (
+        <div className="security-modal-backdrop" role="presentation">
+          <div
+            className="security-verification-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="security-verification-title"
+          >
+            <button
+              type="button"
+              className="security-modal-close"
+              onClick={() => setIsVerificationOpen(false)}
+              aria-label="Close verification dialog"
+            >
+              <X size={18} />
+            </button>
+            <h2 id="security-verification-title">
+              Verify security update
+            </h2>
+            <p>Enter the 6-digit OTP to save your changes.</p>
+            <input
+              className="security-otp-input"
+              value={otp}
+              onChange={(event) => {
+                setOtp(event.target.value.replace(/\D/g, "").slice(0, 6));
+                setOtpError("");
+              }}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              placeholder="000000"
+              aria-label="6-digit verification OTP"
+              autoFocus
+            />
+            {otpError && <p className="security-otp-error">{otpError}</p>}
+            <button
+              type="button"
+              className="security-verify-button"
+              onClick={handleVerification}
+            >
+              Verify & Update
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

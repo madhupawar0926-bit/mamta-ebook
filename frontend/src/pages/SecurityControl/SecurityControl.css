@@ -142,6 +142,17 @@
   transition: background 0.2s ease;
 }
 
+.security-setting-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 0 0 auto;
+}
+
+.security-lock-icon {
+  color: #68736f;
+}
+
 /* WHITE CIRCLE */
 
 .security-toggle-circle {
@@ -191,6 +202,11 @@
   outline-offset: 2px;
 }
 
+.security-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.92;
+}
+
 /* =========================================================
    UPDATE BUTTON
    ========================================================= */
@@ -230,6 +246,106 @@
 
 .security-update-button:active {
   transform: translateY(1px);
+}
+
+.security-update-button:disabled {
+  background: #b9c4bf;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.security-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(20, 30, 26, 0.42);
+}
+
+.security-verification-modal {
+  position: relative;
+  width: min(100%, 390px);
+  padding: 28px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.2);
+}
+
+.security-verification-modal h2 {
+  margin: 0;
+  color: #222;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.security-verification-modal p {
+  margin: 7px 0 18px;
+  color: #777;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.security-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #68736f;
+  cursor: pointer;
+}
+
+.security-modal-close:hover {
+  background: #eef4f1;
+}
+
+.security-otp-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #cbd4d0;
+  border-radius: 6px;
+  color: #222;
+  font-size: 20px;
+  letter-spacing: 4px;
+  text-align: center;
+}
+
+.security-otp-input:focus {
+  border-color: #08c765;
+  outline: 2px solid rgba(8, 199, 101, 0.18);
+}
+
+.security-otp-error {
+  margin: 8px 0 0 !important;
+  color: #c13b3b !important;
+  font-size: 12px !important;
+}
+
+.security-verify-button {
+  width: 100%;
+  height: 40px;
+  margin-top: 18px;
+  border: none;
+  border-radius: 6px;
+  background: #087f43;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.security-verify-button:hover {
+  background: #066c39;
 }
 
 /* =========================================================
@@ -298,6 +414,10 @@
     width: 40px;
     min-width: 40px;
     height: 22px;
+  }
+
+  .security-setting-actions {
+    gap: 12px;
   }
 
   .security-update-wrapper {
