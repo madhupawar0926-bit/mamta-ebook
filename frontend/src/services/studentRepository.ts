@@ -72,19 +72,6 @@ function statusFor(data: Record<string, unknown>): StudentRecord["status"] {
   return "Active";
 }
 
-function getCoverImage(data: Record<string, unknown>): string {
-  const imageUrl =
-    (data.coverImageUrl as string | undefined) ??
-    (data.cover as string | undefined) ??
-    (data.image as string | undefined) ??
-    (data.bookImageUrl as string | undefined) ??
-    (data.coverUrl as string | undefined) ??
-    (data.imageUrl as string | undefined) ??
-    "";
-
-  return typeof imageUrl === "string" ? imageUrl : "";
-}
-
 export async function getStudents(db: Firestore): Promise<StudentRecord[]> {
   const snapshot = await getDocs(
     query(collection(db, "users"), where("role", "==", "student"))
@@ -130,18 +117,56 @@ export async function getStudentPurchases(
   db: Firestore,
   studentUid: string
 ): Promise<PurchasedBookRecord[]> {
-  const snapshot = await getDocs(
-    query(collection(db, "purchases"), where("studentUid", "==", studentUid))
-  );
+  const [purchaseSnapshot, bookSnapshot] = await Promise.all([
+    getDocs(query(collection(db, "purchases"), where("studentUid", "==", studentUid))),
+    getDocs(collection(db, "books")),
+  ]);
 
-  return snapshot.docs.map((purchase) => {
+  const bookMap = new Map<string, { title: string; image: string }>();
+
+  bookSnapshot.docs.forEach((bookDoc) => {
+    const data = bookDoc.data() as Record<string, unknown>;
+    const title = String(data.title ?? data.name ?? "Untitled book");
+    const image = String(
+      data.coverImageUrl ??
+        data.cover ??
+        data.image ??
+        data.imageUrl ??
+        data.coverUrl ??
+        ""
+    );
+
+    bookMap.set(bookDoc.id, { title, image });
+  });
+
+  return purchaseSnapshot.docs.map((purchase) => {
     const data = purchase.data() as Record<string, unknown>;
+    const bookId = String(data.bookId ?? "");
+    const bookInfo = bookId ? bookMap.get(bookId) : undefined;
+    const title = String(
+      data.bookTitle ??
+        data.title ??
+        bookInfo?.title ??
+        "Untitled book"
+    );
+    const image = String(
+      data.coverImageUrl ??
+        data.cover ??
+        data.bookCoverImageUrl ??
+        data.image ??
+        data.imageUrl ??
+        data.coverUrl ??
+        data.bookImageUrl ??
+        bookInfo?.image ??
+        ""
+    );
+
     return {
       id: purchase.id,
-      title: String(data.bookTitle ?? data.title ?? "Untitled book"),
+      title,
       date: `Purchased on ${formatDate(data.purchasedAt, "date unavailable")}`,
       price: `Rs.${Number(data.amountPaid ?? data.originalPrice ?? 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
-      image: getCoverImage(data),
+      image,
     };
   });
 }

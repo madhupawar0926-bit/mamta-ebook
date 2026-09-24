@@ -86,12 +86,8 @@ export default function StudentDetails() {
   useEffect(() => {
     const loadStudents = async () => {
       try {
-        const [records, stats] = await Promise.all([
-          getStudents(db),
-          getPurchaseStats(db),
-        ]);
+        const records = await getStudents(db);
         setStudents(records);
-        setPurchaseStats(stats);
         setSelectedStudentId((current) => current || records[0]?.id || "");
       } catch (error) {
         console.error("Failed to load students", error);
@@ -102,6 +98,19 @@ export default function StudentDetails() {
     };
 
     void loadStudents();
+  }, []);
+
+  useEffect(() => {
+    const loadPurchaseStats = async () => {
+      try {
+        const stats = await getPurchaseStats(db);
+        setPurchaseStats(stats);
+      } catch (error) {
+        console.error("Failed to load purchase stats", error);
+      }
+    };
+
+    void loadPurchaseStats();
   }, []);
 
   useEffect(() => {
