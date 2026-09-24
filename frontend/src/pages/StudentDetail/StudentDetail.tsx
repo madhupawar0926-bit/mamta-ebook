@@ -24,6 +24,7 @@ import { db } from "../../firebase";
 import {
   getStudentDevices,
   getStudentPurchases,
+  getPurchaseStats,
   getStudents,
   type DeviceRecord,
   type PurchasedBookRecord,
@@ -58,6 +59,7 @@ export default function StudentDetails() {
   const [students, setStudents] = useState<StudentRecord[]>([]);
   const [purchasedBooks, setPurchasedBooks] = useState<PurchasedBookRecord[]>([]);
   const [loginDevices, setLoginDevices] = useState<DeviceRecord[]>([]);
+  const [purchaseStats, setPurchaseStats] = useState({ activeBuyers: 0, revenue: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -84,8 +86,12 @@ export default function StudentDetails() {
   useEffect(() => {
     const loadStudents = async () => {
       try {
-        const records = await getStudents(db);
+        const [records, stats] = await Promise.all([
+          getStudents(db),
+          getPurchaseStats(db),
+        ]);
         setStudents(records);
+        setPurchaseStats(stats);
         setSelectedStudentId((current) => current || records[0]?.id || "");
       } catch (error) {
         console.error("Failed to load students", error);
@@ -144,6 +150,13 @@ export default function StudentDetails() {
     });
   }, [statusFilter, search]);
 
+  useEffect(() => {
+    if (filteredStudents.length === 0) return;
+    if (!filteredStudents.some((student) => student.id === selectedStudentId)) {
+      setSelectedStudentId(filteredStudents[0].id);
+    }
+  }, [filteredStudents, selectedStudentId]);
+
   /* =======================================================
      PAGINATION
   ======================================================= */
@@ -170,9 +183,7 @@ export default function StudentDetails() {
     );
   }
 
-  const activeBuyers = students.filter((student) => student.books > 0).length;
   const bannedStudents = students.filter((student) => student.status === "Banned").length;
-  const totalRevenue = students.reduce((total, student) => total + student.spent, 0);
 
   return (
     <div className="student-details-page">
@@ -216,7 +227,7 @@ export default function StudentDetails() {
             </span>
 
             <strong className="student-stat-value">
-              {activeBuyers.toLocaleString()}
+              {purchaseStats.activeBuyers.toLocaleString()}
             </strong>
 
             <span className="student-stat-change positive">
@@ -260,7 +271,7 @@ export default function StudentDetails() {
             </span>
 
             <strong className="student-stat-value">
-              {`Rs.${totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
+              {`Rs.${purchaseStats.revenue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
             </strong>
 
             <span className="student-stat-change positive">
@@ -767,6 +778,7 @@ export default function StudentDetails() {
 
                     <div className="login-device-content">
                       <strong>{device.name}</strong>
+                      <span>Model: {device.model}</span>
                       <span>{device.details}</span>
                       <small>{device.lastActive}</small>
                     </div>

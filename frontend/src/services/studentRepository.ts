@@ -34,6 +34,7 @@ export type PurchasedBookRecord = {
 export type DeviceRecord = {
   id: string;
   name: string;
+  model: string;
   details: string;
   lastActive: string;
   kind: "laptop" | "phone";
@@ -131,13 +132,36 @@ export async function getStudentDevices(
   return snapshot.docs.slice(0, 2).map((device) => {
     const data = device.data();
     const platform = String(data.platform ?? data.deviceType ?? "Android");
-    const kind = /windows|mac|linux|desktop/i.test(platform) ? "laptop" : "phone";
+    const model = String(
+      data.deviceModel ?? data.model ?? data.deviceInfo ?? "Unknown model"
+    );
+    const kind = /windows|mac|linux|desktop|laptop/i.test(`${platform} ${model}`)
+      ? "laptop"
+      : "phone";
     return {
       id: device.id,
-      name: String(data.deviceName ?? data.model ?? platform),
+      name: String(data.deviceName ?? data.name ?? platform),
+      model,
       details: `${platform} · ${String(data.browser ?? data.osVersion ?? "Device")}`,
       lastActive: data.lastActiveAt ? formatDate(data.lastActiveAt) : "Last active unavailable",
       kind,
     };
   });
+}
+
+export async function getPurchaseStats(db: Firestore) {
+  const snapshot = await getDocs(collection(db, "purchases"));
+  const buyerIds = new Set<string>();
+  let revenue = 0;
+
+  snapshot.docs.forEach((purchase) => {
+    const data = purchase.data();
+    if (["paid", "completed", "demo_completed"].includes(String(data.paymentStatus ?? data.status))) {
+      const studentUid = String(data.studentUid ?? "");
+      if (studentUid) buyerIds.add(studentUid);
+      revenue += Number(data.amountPaid ?? data.originalPrice ?? 0);
+    }
+  });
+
+  return { activeBuyers: buyerIds.size, revenue };
 }

@@ -19,6 +19,8 @@ export type NewBookData = {
   recommended: boolean;
   coverFileName: string;
   pdfFileName: string;
+  coverImageUrl?: string;
+  pdfFileUrl?: string;
   coverFile?: File;
   pdfFile?: File;
   categoryId: string;

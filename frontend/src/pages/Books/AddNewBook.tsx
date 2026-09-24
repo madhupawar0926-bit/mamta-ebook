@@ -101,7 +101,7 @@ function DropZone({
             ) : (
               <div className="pdf-preview">
                 <FileText size={28} />
-                <span>{file?.name}</span>
+                <span>{file?.name ?? preview}</span>
               </div>
             )}
             <button
@@ -224,6 +224,12 @@ export default function AddNewBook() {
         setFeatured(book.featured);
         setPublished(book.published);
         setCategoryId(book.categoryId);
+        if (book.coverImageUrl) {
+          setCoverPreview(book.coverImageUrl);
+        }
+        if (book.pdfFileUrl) {
+          setPdfPreview(book.pdfFileName || "Existing PDF attached");
+        }
       } catch (loadError) {
         console.error("Failed to load book", loadError);
         setSaveError("Unable to load the book for editing.");

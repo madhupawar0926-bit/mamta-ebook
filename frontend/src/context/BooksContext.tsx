@@ -190,6 +190,8 @@ export function BooksProvider({ children }: { children: ReactNode }) {
       recommended: false,
       coverFileName: book.coverOriginalFileName,
       pdfFileName: book.pdfOriginalFileName,
+      coverImageUrl: book.coverImageUrl,
+      pdfFileUrl: book.pdfFileUrl,
       categoryId: book.categoryId,
     };
   };
@@ -207,6 +209,7 @@ export function BooksProvider({ children }: { children: ReactNode }) {
       allowPreview: book.allowPreview,
       previewPages: book.allowPreview ? book.previewPages : 0,
       isFeatured: book.featured,
+      status: book.published ? "published" : "draft",
       updatedAt: serverTimestamp(),
     });
     await refresh();

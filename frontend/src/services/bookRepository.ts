@@ -152,7 +152,7 @@ export async function createBook(
       pdfOriginalFileName: input.pdfFileName,
       pdfSizeBytes: input.pdfFile?.size ?? 0,
       isFeatured: input.featured,
-      status: "draft",
+      status: input.published ? "published" : "draft",
       allowPreview: input.allowPreview,
       previewPages: input.allowPreview ? input.previewPages : 0,
       totalPurchases: 0,
