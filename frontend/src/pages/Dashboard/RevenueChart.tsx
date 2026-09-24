@@ -65,11 +65,11 @@ export function RevenueChart() {
       {/* CHART */}
       <div className="chart-area">
         <div className="chart-y-axis">
-          <span>100K</span>
-          <span>80K</span>
-          <span>60K</span>
-          <span>40K</span>
-          <span>20K</span>
+          <span>100</span>
+          <span>80</span>
+          <span>60</span>
+          <span>40</span>
+          <span>20</span>
           <span>0</span>
         </div>
 

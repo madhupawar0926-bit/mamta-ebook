@@ -57,6 +57,10 @@ export function Dashboard() {
   const activeChartData = dashboard.chartData[chartPeriod].filter(
     (item) => chartPeriod !== "Yearly" || item.month === selectedYear
   );
+  const chartMaxValue = Math.max(
+    ...activeChartData.flatMap((item) => [item.revenue, item.purchases]),
+    1
+  );
   const activeSummary = dashboard.summaries[chartPeriod];
   const stats = [
     { title: "Total Books", value: dashboard.stats.totalBooks.toLocaleString(), footer: `${dashboard.stats.categoryCount} Categories`, icon: BookOpen, type: "green", positive: true },
@@ -295,11 +299,11 @@ export function Dashboard() {
 
             <div className="chart-y-axis">
 
-              <span>100K</span>
-              <span>80K</span>
-              <span>60K</span>
-              <span>40K</span>
-              <span>20K</span>
+              <span>100</span>
+              <span>80</span>
+              <span>60</span>
+              <span>40</span>
+              <span>20</span>
               <span>0</span>
 
             </div>
@@ -403,7 +407,7 @@ export function Dashboard() {
                         <div
                           className="bar revenue-bar"
                           style={{
-                            height: `${item.revenue * 2}px`,
+                            height: `${Math.max((item.revenue / chartMaxValue) * 220, 8)}px`,
                           }}
                         />
 
@@ -414,7 +418,7 @@ export function Dashboard() {
                         <div
                           className="bar purchase-bar"
                           style={{
-                            height: `${item.purchases * 2}px`,
+                            height: `${Math.max((item.purchases / chartMaxValue) * 220, 8)}px`,
                           }}
                         />
 

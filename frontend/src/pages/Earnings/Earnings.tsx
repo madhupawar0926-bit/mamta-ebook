@@ -431,7 +431,11 @@ export default function Earnings() {
   const chart = useMemo(() => {
     const width = 900;
     const height = 240;
-    const max = 50;
+    const maxValue = Math.max(
+      ...data.chartData.flatMap((item) => [item.revenue, item.purchases]),
+      1
+    );
+    const max = maxValue * 1.2;
     const top = 10;
     const bottom = 220;
 
@@ -781,11 +785,11 @@ export default function Earnings() {
 
                 <div className="chart-y-axis">
 
-                  <span>50K</span>
-                  <span>40K</span>
-                  <span>30K</span>
-                  <span>20K</span>
-                  <span>10K</span>
+                  <span>50</span>
+                  <span>40</span>
+                  <span>30</span>
+                  <span>20</span>
+                  <span>10</span>
                   <span>0</span>
 
                 </div>
