@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
   ChevronRight,
@@ -104,6 +105,42 @@ type FolderType =
   | "has-folders"
   | "has-books"
   | "empty";
+
+type CategoryStatusFilter = "All" | "Published" | "Draft";
+
+function filterFolderTree(
+  folder: BookFolder,
+  searchValue: string,
+  statusFilter: CategoryStatusFilter
+): BookFolder | null {
+  const matchesSearch =
+    !searchValue || folder.name.toLowerCase().includes(searchValue);
+  const matchesStatus =
+    statusFilter === "All" ||
+    (statusFilter === "Published" && (folder.books ?? []).some((book) => book.status === "Published")) ||
+    (statusFilter === "Draft" && (folder.books ?? []).some((book) => book.status === "Unpublished"));
+  const books = (folder.books ?? []).filter((book) => {
+    const matchesBookSearch =
+      !searchValue ||
+      `${book.title} ${book.author} ${book.code}`
+        .toLowerCase()
+        .includes(searchValue);
+    const matchesBookStatus =
+      statusFilter === "All" ||
+      (statusFilter === "Published" && book.status === "Published") ||
+      (statusFilter === "Draft" && book.status === "Unpublished");
+    return matchesBookSearch && matchesBookStatus;
+  });
+  const children = (folder.children ?? [])
+    .map((child) => filterFolderTree(child, searchValue, statusFilter))
+    .filter((child): child is BookFolder => child !== null);
+
+  if (folder.id === "root" || (matchesSearch && matchesStatus) || children.length > 0 || books.length > 0) {
+    return { ...folder, children, books };
+  }
+
+  return null;
+}
 
 function getFolderType(
   folder: BookFolder
@@ -333,14 +370,18 @@ function TreeNode({
 
 export function Books() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     root: rootFolder,
     addFolder,
     deleteFolder,
+    isLoading: isCategoriesLoading,
+    error: categoriesError,
+    deleteBook,
   } = useBooksContext();
 
   const [selectedFolderId, setSelectedFolderId] =
-    useState("science");
+    useState(searchParams.get("selectedId") ?? "root");
 
   const [expandedIds, setExpandedIds] =
     useState<Set<string>>(
@@ -357,7 +398,7 @@ export function Books() {
     useState("");
 
   const [statusFilter, setStatusFilter] =
-    useState("All");
+    useState<CategoryStatusFilter>("All");
 
   const [mobileTreeOpen, setMobileTreeOpen] =
     useState(false);
@@ -371,6 +412,12 @@ export function Books() {
   const [categoryError, setCategoryError] =
     useState("");
 
+  const [isSavingCategory, setIsSavingCategory] =
+    useState(false);
+  const [openBookMenuId, setOpenBookMenuId] = useState<string | null>(null);
+  const [bookMenuPosition, setBookMenuPosition] = useState<{ top: number; left: number } | null>(null);
+  const [detailBook, setDetailBook] = useState<Book | null>(null);
+
   /* =======================================================
      SELECTED FOLDER
      ======================================================= */
@@ -382,7 +429,7 @@ export function Books() {
         selectedFolderId
       ) ?? rootFolder
     );
-  }, [selectedFolderId]);
+  }, [rootFolder, selectedFolderId]);
 
   /* =======================================================
      BREADCRUMB
@@ -395,7 +442,17 @@ export function Books() {
         selectedFolderId
       ) ?? [rootFolder]
     );
-  }, [selectedFolderId]);
+  }, [rootFolder, selectedFolderId]);
+
+  const visibleRoot = useMemo(
+    () =>
+      filterFolderTree(
+        rootFolder,
+        search.trim().toLowerCase(),
+        statusFilter
+      ) ?? { ...rootFolder, children: [] },
+    [rootFolder, search, statusFilter]
+  );
 
   /* =======================================================
      FOLDER FILTER
@@ -500,7 +557,7 @@ export function Books() {
     navigate(`/category/folders/new?editId=${encodeURIComponent(id)}`);
   };
 
-  const removeFolder = (id: string) => {
+  const removeFolder = async (id: string) => {
     const folder = findFolder(rootFolder, id);
     if (!folder || !window.confirm(`Delete folder "${folder.name}" and everything inside it?`)) {
       return;
@@ -508,7 +565,17 @@ export function Books() {
 
     const path = findPath(rootFolder, id);
     const parent = path && path.length > 1 ? path[path.length - 2] : rootFolder;
-    deleteFolder(id);
+    try {
+      await deleteFolder(id);
+    } catch (deleteError) {
+      console.error("Failed to delete category", deleteError);
+      window.alert(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Unable to delete category. Please try again."
+      );
+      return;
+    }
 
     if (selectedFolderId === id || path?.some((item) => item.id === selectedFolderId)) {
       setSelectedFolderId(parent.id);
@@ -527,7 +594,7 @@ export function Books() {
     setCategoryError("");
   };
 
-  const createCategory = () => {
+  const createCategory = async () => {
     const name = categoryName.trim();
 
     if (!name) {
@@ -535,26 +602,53 @@ export function Books() {
       return;
     }
 
+    setIsSavingCategory(true);
+    setCategoryError("");
+
     const formattedDate = new Date().toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
 
-    addFolder(selectedFolderId, {
-      id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
-      name,
-      type: "folder",
-      status: "Published",
-      sortOrder: (selectedFolder.children?.length ?? 0) + 1,
-      updatedAt: formattedDate,
-      children: [],
-    });
+    try {
+      await addFolder(selectedFolderId, {
+        id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
+        name,
+        type: "folder",
+        status: "Published",
+        visibility: "published",
+        sortOrder: (selectedFolder.children?.length ?? 0) + 1,
+        updatedAt: formattedDate,
+        children: [],
+      });
 
-    setExpandedIds((previous) =>
-      new Set(previous).add(selectedFolderId)
-    );
-    closeCreateCategory();
+      setExpandedIds((previous) =>
+        new Set(previous).add(selectedFolderId)
+      );
+      closeCreateCategory();
+    } catch (createError) {
+      console.error("Failed to create category", createError);
+      setCategoryError(
+        createError instanceof Error
+          ? createError.message
+          : "Unable to create category. Please try again."
+      );
+    } finally {
+      setIsSavingCategory(false);
+    }
+  };
+
+  const handleDeleteBook = async (book: Book) => {
+    if (!window.confirm(`Delete book "${book.title}"?`)) return;
+    try {
+      await deleteBook(book.id);
+      setOpenBookMenuId(null);
+      setBookMenuPosition(null);
+    } catch (deleteError) {
+      console.error("Failed to delete book", deleteError);
+      window.alert("Unable to delete the book. Please try again.");
+    }
   };
 
   /* =======================================================
@@ -598,6 +692,12 @@ export function Books() {
 
         <div className="books-header-actions-placeholder" />
       </div>
+
+      {(isCategoriesLoading || categoriesError) && (
+        <div className="category-data-status" role={categoriesError ? "alert" : undefined}>
+          {isCategoriesLoading ? "Loading categories..." : categoriesError}
+        </div>
+      )}
 
       {/* ===================================================
           TABS
@@ -652,7 +752,7 @@ export function Books() {
 
           <div className="catalogue-tree">
             <TreeNode
-              folder={rootFolder}
+              folder={visibleRoot}
               level={0}
               selectedId={selectedFolderId}
               expandedIds={expandedIds}
@@ -759,7 +859,7 @@ export function Books() {
                   <>
                     {showBook && (
                       <Link
-                        to="/category/addnewbook"
+                        to={`/category/addnewbook?categoryId=${encodeURIComponent(selectedFolderId)}`}
                         className="add-book-button"
                       >
                         <Plus size={17} />
@@ -823,7 +923,7 @@ export function Books() {
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(
-                    event.target.value
+                    event.target.value as CategoryStatusFilter
                   )
                 }
               >
@@ -835,8 +935,8 @@ export function Books() {
                   Published
                 </option>
 
-                <option value="Unpublished">
-                  Unpublished
+                <option value="Draft">
+                  Draft
                 </option>
               </select>
 
@@ -1102,6 +1202,27 @@ export function Books() {
                           <BookRow
                             key={book.id}
                             book={book}
+                            menuOpen={openBookMenuId === book.id}
+                            onMenuToggle={(button) => {
+                              if (openBookMenuId === book.id) {
+                                setOpenBookMenuId(null);
+                                setBookMenuPosition(null);
+                                return;
+                              }
+                              const rect = button.getBoundingClientRect();
+                              const menuHeight = 116;
+                              setOpenBookMenuId(book.id);
+                              setBookMenuPosition({
+                                top: rect.bottom + 4 + menuHeight > window.innerHeight
+                                  ? rect.top - menuHeight - 4
+                                  : rect.bottom + 4,
+                                left: Math.max(8, rect.right - 105),
+                              });
+                            }}
+                            onEdit={() => navigate(`/category/addnewbook?categoryId=${encodeURIComponent(book.categoryId ?? selectedFolderId)}&editId=${encodeURIComponent(book.id)}`)}
+                            onDelete={() => void handleDeleteBook(book)}
+                            onDetails={() => { setDetailBook(book); setOpenBookMenuId(null); setBookMenuPosition(null); }}
+                            menuPosition={openBookMenuId === book.id ? bookMenuPosition : null}
                           />
                         )
                       )}
@@ -1180,13 +1301,11 @@ export function Books() {
 
               <div className="summary-visibility">
                 <span>
-                  Visibility
+                  Content Type
                 </span>
 
                 <StatusBadge
-                  status={
-                    selectedFolder.status
-                  }
+                  status={selectedFolder.contentType ?? "empty"}
                 />
               </div>
             </aside>
@@ -1194,6 +1313,36 @@ export function Books() {
 
         </main>
       </div>
+
+      {detailBook && (
+        <div className="book-details-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setDetailBook(null);
+        }}>
+          <div className="book-details-modal" role="dialog" aria-modal="true" aria-labelledby="book-details-title">
+            <div className="book-details-header">
+              <div>
+                <span>Book Details</span>
+                <h2 id="book-details-title">{detailBook.title}</h2>
+              </div>
+              <button type="button" className="book-details-close" onClick={() => setDetailBook(null)} aria-label="Close book details">
+                <X size={20} />
+              </button>
+            </div>
+            {detailBook.image && <img className="book-details-cover" src={detailBook.image} alt={detailBook.title} />}
+            <div className="book-details-grid">
+              <DetailItem label="Author" value={detailBook.authorName ?? detailBook.author} />
+              <DetailItem label="ISBN / Book Code" value={detailBook.isbnOrBookCode ?? detailBook.code} />
+              <DetailItem label="Language" value={detailBook.language ?? "Not available"} />
+              <DetailItem label="Price" value={`₹${detailBook.price}`} />
+              <DetailItem label="Page Count" value={String(detailBook.pageCount ?? "Not available")} />
+              <DetailItem label="Status" value={detailBook.status} />
+              <DetailItem label="Purchases" value={String(detailBook.totalPurchases ?? detailBook.purchases)} />
+              <DetailItem label="Publisher" value={detailBook.publisherName ?? "Mamta Publications"} />
+            </div>
+            {detailBook.description && <p className="book-details-description">{detailBook.description}</p>}
+          </div>
+        </div>
+      )}
 
       {isCreateCategoryOpen && (
         <div
@@ -1259,8 +1408,9 @@ export function Books() {
                 type="button"
                 className="create-category-submit"
                 onClick={createCategory}
+                disabled={isSavingCategory}
               >
-                Create category
+                {isSavingCategory ? "Creating..." : "Create category"}
               </button>
             </div>
           </div>
@@ -1276,8 +1426,20 @@ export function Books() {
 
 function BookRow({
   book,
+  menuOpen,
+  onMenuToggle,
+  onEdit,
+  onDelete,
+  onDetails,
+  menuPosition,
 }: {
   book: Book;
+  menuOpen: boolean;
+  onMenuToggle: (button: HTMLButtonElement) => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onDetails: () => void;
+  menuPosition: { top: number; left: number } | null;
 }) {
   return (
     <tr>
@@ -1288,6 +1450,9 @@ function BookRow({
           <img
             src={book.image}
             alt={book.title}
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                    }}
           />
 
           <div>
@@ -1335,15 +1500,30 @@ function BookRow({
       </td>
 
       <td>
-        <button
-          type="button"
-          className="book-more-button"
-        >
-          <MoreVertical size={16} />
-        </button>
+        <div className="book-action-menu">
+          <button type="button" className="book-more-button" onClick={(event) => onMenuToggle(event.currentTarget)} aria-label={`Actions for ${book.title}`}>
+            <MoreVertical size={16} />
+          </button>
+          {menuOpen && (
+            <div className="book-action-dropdown" style={menuPosition ? { top: menuPosition.top, left: menuPosition.left } : undefined}>
+              <button type="button" onClick={onEdit}>Edit</button>
+              <button type="button" onClick={onDelete}>Delete</button>
+              <button type="button" onClick={onDetails}>Details</button>
+            </div>
+          )}
+        </div>
       </td>
 
     </tr>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="book-detail-item">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 
@@ -1354,17 +1534,18 @@ function BookRow({
 function StatusBadge({
   status,
 }: {
-  status: "Published" | "Unpublished";
+  status: "Published" | "Unpublished" | "Draft" | "empty" | "categories" | "books";
 }) {
+  const label = status === "empty" ? "Empty" : status === "categories" ? "Categories" : status === "books" ? "Books" : status;
   return (
     <span
       className={`status-badge ${
-        status === "Published"
+        status === "Published" || status === "books"
           ? "published"
           : "unpublished"
       }`}
     >
-      {status}
+      {label}
     </span>
   );
 }

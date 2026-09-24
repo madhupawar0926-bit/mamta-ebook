@@ -1,7 +1,7 @@
 .security-controls-page {
   width: 100%;
   margin: 0 auto;
-  padding: 28px 30px 40px;
+  padding: 0px 10px;
   box-sizing: border-box;
 }
 
@@ -30,6 +30,16 @@
   line-height: 18px;
 
   color: #777;
+}
+
+.security-data-status {
+  margin: 0 0 12px;
+  color: #68736f;
+  font-size: 12px;
+}
+
+.security-data-error {
+  color: #c13b3b;
 }
 
 /* =========================================================
@@ -346,6 +356,11 @@
 
 .security-verify-button:hover {
   background: #066c39;
+}
+
+.security-verify-button:disabled {
+  background: #b9c4bf;
+  cursor: not-allowed;
 }
 
 /* =========================================================

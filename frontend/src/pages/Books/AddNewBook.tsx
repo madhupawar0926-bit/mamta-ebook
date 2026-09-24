@@ -8,8 +8,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { useRef, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRef, useState, useCallback, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+import { useBooksContext } from "../../context/BooksContextValue";
 
 import "./AddNewBook.css";
 
@@ -99,7 +101,7 @@ function DropZone({
             ) : (
               <div className="pdf-preview">
                 <FileText size={28} />
-                <span>{file?.name}</span>
+                <span>{file?.name ?? preview}</span>
               </div>
             )}
             <button
@@ -164,6 +166,10 @@ const MAX_DESC = 500;
 
 export default function AddNewBook() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { root, addBook, getBook, updateBook } = useBooksContext();
+  const editId = searchParams.get("editId");
+  const [categoryId, setCategoryId] = useState(searchParams.get("categoryId") ?? "");
 
   /* -------------------------------------------------------
      FORM STATE
@@ -187,12 +193,53 @@ export default function AddNewBook() {
   const [allowPreview, setAllowPreview] = useState(true);
   const [previewPages, setPreviewPages] = useState(10);
   const [featured, setFeatured] = useState(false);
-  const [published, setPublished] = useState(true);
-  const [recommended, setRecommended] = useState(false);
+  const [published, setPublished] = useState(false);
+  const [recommended] = useState(false);
 
   /* ui */
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [isLoadingBook, setIsLoadingBook] = useState(Boolean(editId));
+
+  useEffect(() => {
+    if (!editId) return;
+
+    const loadBook = async () => {
+      try {
+        const book = await getBook(editId);
+        if (!book) {
+          setSaveError("Book not found.");
+          return;
+        }
+        setTitle(book.title);
+        setAuthor(book.author);
+        setIsbn(book.isbn);
+        setPrice(String(book.price));
+        setLanguage(book.language);
+        setDescription(book.description);
+        setTags(String(book.pageCount));
+        setAllowPreview(book.allowPreview);
+        setPreviewPages(book.previewPages);
+        setFeatured(book.featured);
+        setPublished(book.published);
+        setCategoryId(book.categoryId);
+        if (book.coverImageUrl) {
+          setCoverPreview(book.coverImageUrl);
+        }
+        if (book.pdfFileUrl) {
+          setPdfPreview(book.pdfFileName || "Existing PDF attached");
+        }
+      } catch (loadError) {
+        console.error("Failed to load book", loadError);
+        setSaveError("Unable to load the book for editing.");
+      } finally {
+        setIsLoadingBook(false);
+      }
+    };
+
+    void loadBook();
+  }, [editId]);
 
   /* -------------------------------------------------------
      COVER UPLOAD
@@ -236,8 +283,13 @@ export default function AddNewBook() {
     if (!author.trim()) e.author = "Author is required.";
     if (!price || Number(price) <= 0) e.price = "Enter a valid price.";
     if (!description.trim()) e.description = "Description is required.";
-    if (!coverFile) e.cover = "Book cover is required.";
-    if (!pdfFile) e.pdf = "Ebook PDF is required.";
+    if (!language.trim()) e.language = "Language is required.";
+    if (!tags || Number(tags) < 0) e.tags = "Enter a valid page count.";
+    if (allowPreview && Number(tags) >= 0 && previewPages > Number(tags)) {
+      e.previewPages = "Preview pages cannot exceed the page count.";
+    }
+    if (!editId && !coverFile) e.cover = "Book cover is required.";
+    if (!editId && !pdfFile) e.pdf = "Ebook PDF is required.";
     return e;
   };
 
@@ -245,10 +297,10 @@ export default function AddNewBook() {
      SUBMIT
   ------------------------------------------------------- */
 
-  const handleSave = (isDraft = false) => {
+  const handleSave = async (isDraft = false) => {
     const e = validate();
 
-    if (!isDraft && Object.keys(e).length > 0) {
+    if (Object.keys(e).length > 0) {
       setErrors(e);
       // scroll to first error
       const first = document.querySelector(".field-error");
@@ -256,21 +308,61 @@ export default function AddNewBook() {
       return;
     }
 
+    if (!categoryId) {
+      setSaveError("Select a category from the Category page before saving.");
+      return;
+    }
+
+    setSaveError("");
     setSubmitted(true);
 
-    // Simulate save — replace with real API call
-    console.log("Saving book", {
-      title, author, isbn, price,
-      language, description, tags,
-      coverFile, pdfFile,
-      allowPreview, previewPages,
-      featured, published, recommended,
-      isDraft,
-    });
-
-    setTimeout(() => {
-      navigate("/category");
-    }, 800);
+    try {
+      const bookData = {
+        title,
+        author,
+        isbn,
+        price: Number(price),
+        language,
+        description,
+        tags,
+        pageCount: Number(tags) || 0,
+        publisherName: "Mamta Publications",
+        allowPreview,
+        previewPages,
+        featured,
+        published: isDraft ? false : published,
+        recommended,
+        coverFileName: coverFile?.name ?? "",
+        pdfFileName: pdfFile?.name ?? "",
+        coverFile: coverFile ?? undefined,
+        pdfFile: pdfFile ?? undefined,
+        categoryId,
+      };
+      if (editId) {
+        await updateBook(editId, bookData);
+      } else {
+        await addBook(bookData);
+      }
+      navigate(`/category?selectedId=${encodeURIComponent(categoryId)}`);
+    } catch (saveErrorValue) {
+      console.error("Failed to save book", saveErrorValue);
+      const errorCode =
+        typeof saveErrorValue === "object" &&
+        saveErrorValue !== null &&
+        "code" in saveErrorValue
+          ? String(saveErrorValue.code)
+          : "";
+      const errorMessage =
+        saveErrorValue instanceof Error ? saveErrorValue.message : "";
+      setSaveError(
+        errorCode.includes("storage/unauthorized")
+          ? "You do not have permission to upload this book cover or PDF."
+          : errorCode.includes("permission-denied")
+            ? "You do not have permission to save books."
+            : errorMessage || "Unable to save the book. Please try again."
+      );
+      setSubmitted(false);
+    }
   };
 
   /* -------------------------------------------------------
@@ -287,6 +379,17 @@ export default function AddNewBook() {
   ];
 
   const allDone = requiredFields.every((f) => f.done);
+  const selectedCategory = (() => {
+    const findCategory = (folder: typeof root): typeof root | null => {
+      if (folder.id === categoryId) return folder;
+      for (const child of folder.children ?? []) {
+        const result = findCategory(child);
+        if (result) return result;
+      }
+      return null;
+    };
+    return findCategory(root);
+  })();
 
   /* -------------------------------------------------------
      RENDER
@@ -299,8 +402,8 @@ export default function AddNewBook() {
 
       <div className="add-book-page-header">
         <div>
-          <h1>Add New Book</h1>
-          <p>Create a new ebook record.</p>
+          <h1>{editId ? "Edit Book" : "Add New Book"}</h1>
+          <p>{editId ? "Update the ebook record." : "Create a new ebook record."}</p>
         </div>
 
         <div className="page-breadcrumb">
@@ -308,9 +411,11 @@ export default function AddNewBook() {
           <b>›</b>
           <span>Catalogue</span>
           <b>›</b>
-          <strong>Add New Book</strong>
+              <strong>{editId ? "Edit Book" : "Add New Book"}</strong>
         </div>
       </div>
+
+      {saveError && <p className="field-error" role="alert">{saveError}</p>}
 
 
       <div className="add-book-layout">
@@ -465,13 +570,27 @@ export default function AddNewBook() {
                   type="text"
                   placeholder="Enter number of pages"
                   value={tags}
+                  className={errors.tags ? "input-error" : ""}
  onChange={(e) => {
       const value = e.target.value;
 
       if (/^\d*$/.test(value)) {
         setTags(value);
+        setErrors((prev) => ({ ...prev, tags: undefined, previewPages: undefined }));
       }
     }}                />
+                {errors.tags && (
+                  <p className="field-error">
+                    <AlertCircle size={11} />
+                    {errors.tags}
+                  </p>
+                )}
+                {errors.previewPages && (
+                  <p className="field-error">
+                    <AlertCircle size={11} />
+                    {errors.previewPages}
+                  </p>
+                )}
               </div>
 
             </div>
@@ -586,7 +705,7 @@ export default function AddNewBook() {
                 type="button"
                 className="draft-button"
                 onClick={() => handleSave(true)}
-                disabled={submitted}
+                disabled={submitted || isLoadingBook}
               >
                 Save Draft
               </button>
@@ -595,9 +714,9 @@ export default function AddNewBook() {
                 type="button"
                 className="primary-button"
                 onClick={() => handleSave(false)}
-                disabled={submitted}
+                disabled={submitted || isLoadingBook}
               >
-                {submitted ? "Saving..." : "Save Book"}
+                {submitted ? "Saving..." : editId ? "Update Book" : "Save Book"}
               </button>
             </div>
           </div>
@@ -619,7 +738,7 @@ export default function AddNewBook() {
             </div>
 
             <span className="info-label">Folder Path</span>
-            <p>Home › School Books › CBSE › Class 11 › Science</p>
+            <p>{selectedCategory?.name ?? "No category selected"}</p>
 
             <div className="info-row">
               <span>Subfolders</span>

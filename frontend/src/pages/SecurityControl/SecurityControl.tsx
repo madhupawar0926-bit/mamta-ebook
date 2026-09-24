@@ -1,5 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LockKeyhole, X } from "lucide-react";
+
+import { db } from "../../firebase";
+import {
+  defaultSecurityControls,
+  saveSecurityControls,
+  subscribeToSecurityControls,
+  type SecurityControls as SecuritySettings,
+} from "../../services/securityControlsRepository";
 
 import "./SecurityControl.css";
 
@@ -15,24 +23,6 @@ type SecuritySetting = {
   locked?: boolean;
 };
 
-type SecuritySettings = {
-  disablePdfDownload: boolean;
-  disableSharing: boolean;
-  disableExport: boolean;
-  disablePrinting: boolean;
-  disableTextSelection: boolean;
-  disableCopyPaste: boolean;
-  blockScreenshots: boolean;
-  detectScreenRecording: boolean;
-  enableDynamicWatermark: boolean;
-  showUserId: boolean;
-  showBookId: boolean;
-  showSessionId: boolean;
-  showTimestamp: boolean;
-  rotateWatermark: boolean;
-  repeatWatermark: boolean;
-};
-
 /* =========================================================
    SECURITY CONTROLS
    ========================================================= */
@@ -42,32 +32,35 @@ export default function SecurityControls() {
      TOGGLE STATES
   ======================================================= */
 
-  const initialSettings: SecuritySettings = {
-      disablePdfDownload: true,
-      disableSharing: true,
-      disableExport: true,
-      disablePrinting: true,
-      disableTextSelection: true,
-      disableCopyPaste: true,
-
-      blockScreenshots: true,
-      detectScreenRecording: true,
-
-      enableDynamicWatermark: true,
-      showUserId: true,
-      showBookId: true,
-      showSessionId: true,
-      showTimestamp: true,
-      rotateWatermark: true,
-      repeatWatermark: true,
-  };
-
-  const [settings, setSettings] = useState<SecuritySettings>(initialSettings);
+  const [settings, setSettings] =
+    useState<SecuritySettings>(defaultSecurityControls);
   const [savedSettings, setSavedSettings] =
-    useState<SecuritySettings>(initialSettings);
+    useState<SecuritySettings>(defaultSecurityControls);
   const [isVerificationOpen, setIsVerificationOpen] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    const unsubscribe = subscribeToSecurityControls(
+      db,
+      (nextSettings) => {
+        setSettings(nextSettings);
+        setSavedSettings(nextSettings);
+        setLoadError("");
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Failed to load security controls", error);
+        setLoadError("Unable to load security settings. Please try again.");
+        setIsLoading(false);
+      }
+    );
+
+    return unsubscribe;
+  }, []);
 
   const hasChanges =
     JSON.stringify(settings) !== JSON.stringify(savedSettings);
@@ -328,16 +321,26 @@ export default function SecurityControls() {
     setIsVerificationOpen(true);
   };
 
-  const handleVerification = () => {
+  const handleVerification = async () => {
     if (otp !== "123456") {
       setOtpError("Enter the correct 6-digit verification code.");
       return;
     }
 
-    setSavedSettings(settings);
-    setIsVerificationOpen(false);
-    setOtp("");
+    setIsSaving(true);
     setOtpError("");
+
+    try {
+      await saveSecurityControls(db, settings);
+      setSavedSettings(settings);
+      setIsVerificationOpen(false);
+      setOtp("");
+    } catch (saveError) {
+      console.error("Failed to save security controls", saveError);
+      setOtpError("Unable to save security settings. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   /* =======================================================
@@ -346,6 +349,16 @@ export default function SecurityControls() {
 
   return (
     <div className="security-controls-page">
+
+      {isLoading && (
+        <p className="security-data-status">Loading security settings...</p>
+      )}
+
+      {loadError && (
+        <p className="security-data-status security-data-error" role="alert">
+          {loadError}
+        </p>
+      )}
 
       {/* ===================================================
           PAGE HEADER
@@ -424,7 +437,7 @@ export default function SecurityControls() {
           type="button"
           className="security-update-button"
           onClick={handleUpdate}
-          disabled={!hasChanges}
+          disabled={!hasChanges || isLoading || Boolean(loadError)}
         >
           Update Security Settings
         </button>
@@ -469,8 +482,9 @@ export default function SecurityControls() {
               type="button"
               className="security-verify-button"
               onClick={handleVerification}
+              disabled={isSaving}
             >
-              Verify & Update
+              {isSaving ? "Saving..." : "Verify & Update"}
             </button>
           </div>
         </div>

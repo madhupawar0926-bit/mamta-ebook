@@ -8,6 +8,36 @@ export type Book = {
   status: "Published" | "Unpublished";
   updatedAt: string;
   image: string;
+  categoryId?: string;
+  categoryPath?: string;
+  isbn?: string;
+  language?: string;
+  description?: string;
+  tags?: string;
+  allowPreview?: boolean;
+  previewPages?: number;
+  featured?: boolean;
+  recommended?: boolean;
+  published?: boolean;
+  authorName?: string;
+  isbnOrBookCode?: string;
+  pageCount?: number;
+  publisherName?: string;
+  currency?: "INR";
+  coverImageUrl?: string;
+  coverStoragePath?: string;
+  coverOriginalFileName?: string;
+  pdfFileUrl?: string;
+  pdfStoragePath?: string;
+  pdfOriginalFileName?: string;
+  pdfSizeBytes?: number;
+  isFeatured?: boolean;
+  totalPurchases?: number;
+  totalRevenue?: number;
+  categoryPathIds?: string[];
+  categoryPathNames?: string[];
+  coverFileName?: string;
+  pdfFileName?: string;
 };
 
 export type BookFolder = {
@@ -15,6 +45,8 @@ export type BookFolder = {
   name: string;
   type: "folder";
   status: "Published" | "Unpublished";
+  contentType?: "empty" | "categories" | "books";
+  visibility?: "published" | "draft";
   sortOrder: number;
   updatedAt: string;
 
