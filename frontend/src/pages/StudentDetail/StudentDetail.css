@@ -17,6 +17,13 @@
   box-sizing: border-box;
 }
 
+.student-data-state {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+}
+
 .student-details-page button,
 .student-details-page input,
 .student-details-page select {
