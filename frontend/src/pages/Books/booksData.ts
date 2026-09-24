@@ -28,6 +28,7 @@ export type BookFolder = {
   name: string;
   type: "folder";
   status: "Published" | "Unpublished";
+  contentType?: "empty" | "categories" | "books";
   visibility?: "published" | "draft";
   sortOrder: number;
   updatedAt: string;

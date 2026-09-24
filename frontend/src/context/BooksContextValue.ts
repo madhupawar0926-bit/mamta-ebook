@@ -10,6 +10,8 @@ export type NewBookData = {
   language: string;
   description: string;
   tags: string;
+  pageCount: number;
+  publisherName: string;
   allowPreview: boolean;
   previewPages: number;
   featured: boolean;
@@ -17,6 +19,8 @@ export type NewBookData = {
   recommended: boolean;
   coverFileName: string;
   pdfFileName: string;
+  coverFile?: File;
+  pdfFile?: File;
   categoryId: string;
 };
 

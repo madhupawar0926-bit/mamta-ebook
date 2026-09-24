@@ -192,7 +192,7 @@ export default function AddNewBook() {
   const [allowPreview, setAllowPreview] = useState(true);
   const [previewPages, setPreviewPages] = useState(10);
   const [featured, setFeatured] = useState(false);
-  const [published, setPublished] = useState(true);
+  const [published, setPublished] = useState(false);
   const [recommended] = useState(false);
 
   /* ui */
@@ -242,6 +242,11 @@ export default function AddNewBook() {
     if (!author.trim()) e.author = "Author is required.";
     if (!price || Number(price) <= 0) e.price = "Enter a valid price.";
     if (!description.trim()) e.description = "Description is required.";
+    if (!language.trim()) e.language = "Language is required.";
+    if (!tags || Number(tags) < 0) e.tags = "Enter a valid page count.";
+    if (allowPreview && Number(tags) >= 0 && previewPages > Number(tags)) {
+      e.previewPages = "Preview pages cannot exceed the page count.";
+    }
     if (!coverFile) e.cover = "Book cover is required.";
     if (!pdfFile) e.pdf = "Ebook PDF is required.";
     return e;
@@ -254,7 +259,7 @@ export default function AddNewBook() {
   const handleSave = async (isDraft = false) => {
     const e = validate();
 
-    if (!isDraft && Object.keys(e).length > 0) {
+    if (Object.keys(e).length > 0) {
       setErrors(e);
       // scroll to first error
       const first = document.querySelector(".field-error");
@@ -279,6 +284,8 @@ export default function AddNewBook() {
         language,
         description,
         tags,
+        pageCount: Number(tags) || 0,
+        publisherName: "Mamta Publications",
         allowPreview,
         previewPages,
         featured,
@@ -286,14 +293,15 @@ export default function AddNewBook() {
         recommended,
         coverFileName: coverFile?.name ?? "",
         pdfFileName: pdfFile?.name ?? "",
+        coverFile: coverFile ?? undefined,
+        pdfFile: pdfFile ?? undefined,
         categoryId,
       });
       navigate(`/category?selectedId=${encodeURIComponent(categoryId)}`);
     } catch (saveErrorValue) {
       console.error("Failed to save book", saveErrorValue);
       setSaveError(
-        saveErrorValue instanceof Error &&
-        saveErrorValue.message === "Select a valid category before saving the book."
+        saveErrorValue instanceof Error && saveErrorValue.message
           ? saveErrorValue.message
           : "Unable to save the book. Please try again."
       );

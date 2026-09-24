@@ -117,8 +117,8 @@ function filterFolderTree(
     !searchValue || folder.name.toLowerCase().includes(searchValue);
   const matchesStatus =
     statusFilter === "All" ||
-    (statusFilter === "Published" && folder.visibility !== "draft") ||
-    (statusFilter === "Draft" && folder.visibility === "draft");
+    (statusFilter === "Published" && (folder.books ?? []).some((book) => book.status === "Published")) ||
+    (statusFilter === "Draft" && (folder.books ?? []).some((book) => book.status === "Unpublished"));
   const books = (folder.books ?? []).filter((book) => {
     const matchesBookSearch =
       !searchValue ||
@@ -553,7 +553,7 @@ export function Books() {
     navigate(`/category/folders/new?editId=${encodeURIComponent(id)}`);
   };
 
-  const removeFolder = (id: string) => {
+  const removeFolder = async (id: string) => {
     const folder = findFolder(rootFolder, id);
     if (!folder || !window.confirm(`Delete folder "${folder.name}" and everything inside it?`)) {
       return;
@@ -561,7 +561,17 @@ export function Books() {
 
     const path = findPath(rootFolder, id);
     const parent = path && path.length > 1 ? path[path.length - 2] : rootFolder;
-    deleteFolder(id);
+    try {
+      await deleteFolder(id);
+    } catch (deleteError) {
+      console.error("Failed to delete category", deleteError);
+      window.alert(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Unable to delete category. Please try again."
+      );
+      return;
+    }
 
     if (selectedFolderId === id || path?.some((item) => item.id === selectedFolderId)) {
       setSelectedFolderId(parent.id);
@@ -1254,11 +1264,11 @@ export function Books() {
 
               <div className="summary-visibility">
                 <span>
-                  Visibility
+                  Content Type
                 </span>
 
                 <StatusBadge
-                  status={selectedFolder.visibility === "draft" ? "Draft" : "Published"}
+                  status={selectedFolder.contentType ?? "empty"}
                 />
               </div>
             </aside>
@@ -1361,6 +1371,9 @@ function BookRow({
           <img
             src={book.image}
             alt={book.title}
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                    }}
           />
 
           <div>
@@ -1427,17 +1440,18 @@ function BookRow({
 function StatusBadge({
   status,
 }: {
-  status: "Published" | "Unpublished" | "Draft";
+  status: "Published" | "Unpublished" | "Draft" | "empty" | "categories" | "books";
 }) {
+  const label = status === "empty" ? "Empty" : status === "categories" ? "Categories" : status === "books" ? "Books" : status;
   return (
     <span
       className={`status-badge ${
-        status === "Published"
+        status === "Published" || status === "books"
           ? "published"
           : "unpublished"
       }`}
     >
-      {status}
+      {label}
     </span>
   );
 }
