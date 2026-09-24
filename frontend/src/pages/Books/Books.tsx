@@ -377,6 +377,7 @@ export function Books() {
     deleteFolder,
     isLoading: isCategoriesLoading,
     error: categoriesError,
+    deleteBook,
   } = useBooksContext();
 
   const [selectedFolderId, setSelectedFolderId] =
@@ -413,6 +414,9 @@ export function Books() {
 
   const [isSavingCategory, setIsSavingCategory] =
     useState(false);
+  const [openBookMenuId, setOpenBookMenuId] = useState<string | null>(null);
+  const [bookMenuPosition, setBookMenuPosition] = useState<{ top: number; left: number } | null>(null);
+  const [detailBook, setDetailBook] = useState<Book | null>(null);
 
   /* =======================================================
      SELECTED FOLDER
@@ -632,6 +636,18 @@ export function Books() {
       );
     } finally {
       setIsSavingCategory(false);
+    }
+  };
+
+  const handleDeleteBook = async (book: Book) => {
+    if (!window.confirm(`Delete book "${book.title}"?`)) return;
+    try {
+      await deleteBook(book.id);
+      setOpenBookMenuId(null);
+      setBookMenuPosition(null);
+    } catch (deleteError) {
+      console.error("Failed to delete book", deleteError);
+      window.alert("Unable to delete the book. Please try again.");
     }
   };
 
@@ -1186,6 +1202,27 @@ export function Books() {
                           <BookRow
                             key={book.id}
                             book={book}
+                            menuOpen={openBookMenuId === book.id}
+                            onMenuToggle={(button) => {
+                              if (openBookMenuId === book.id) {
+                                setOpenBookMenuId(null);
+                                setBookMenuPosition(null);
+                                return;
+                              }
+                              const rect = button.getBoundingClientRect();
+                              const menuHeight = 116;
+                              setOpenBookMenuId(book.id);
+                              setBookMenuPosition({
+                                top: rect.bottom + 4 + menuHeight > window.innerHeight
+                                  ? rect.top - menuHeight - 4
+                                  : rect.bottom + 4,
+                                left: Math.max(8, rect.right - 105),
+                              });
+                            }}
+                            onEdit={() => navigate(`/category/addnewbook?categoryId=${encodeURIComponent(book.categoryId ?? selectedFolderId)}&editId=${encodeURIComponent(book.id)}`)}
+                            onDelete={() => void handleDeleteBook(book)}
+                            onDetails={() => { setDetailBook(book); setOpenBookMenuId(null); setBookMenuPosition(null); }}
+                            menuPosition={openBookMenuId === book.id ? bookMenuPosition : null}
                           />
                         )
                       )}
@@ -1277,6 +1314,36 @@ export function Books() {
         </main>
       </div>
 
+      {detailBook && (
+        <div className="book-details-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setDetailBook(null);
+        }}>
+          <div className="book-details-modal" role="dialog" aria-modal="true" aria-labelledby="book-details-title">
+            <div className="book-details-header">
+              <div>
+                <span>Book Details</span>
+                <h2 id="book-details-title">{detailBook.title}</h2>
+              </div>
+              <button type="button" className="book-details-close" onClick={() => setDetailBook(null)} aria-label="Close book details">
+                <X size={20} />
+              </button>
+            </div>
+            {detailBook.image && <img className="book-details-cover" src={detailBook.image} alt={detailBook.title} />}
+            <div className="book-details-grid">
+              <DetailItem label="Author" value={detailBook.authorName ?? detailBook.author} />
+              <DetailItem label="ISBN / Book Code" value={detailBook.isbnOrBookCode ?? detailBook.code} />
+              <DetailItem label="Language" value={detailBook.language ?? "Not available"} />
+              <DetailItem label="Price" value={`₹${detailBook.price}`} />
+              <DetailItem label="Page Count" value={String(detailBook.pageCount ?? "Not available")} />
+              <DetailItem label="Status" value={detailBook.status} />
+              <DetailItem label="Purchases" value={String(detailBook.totalPurchases ?? detailBook.purchases)} />
+              <DetailItem label="Publisher" value={detailBook.publisherName ?? "Mamta Publications"} />
+            </div>
+            {detailBook.description && <p className="book-details-description">{detailBook.description}</p>}
+          </div>
+        </div>
+      )}
+
       {isCreateCategoryOpen && (
         <div
           className="create-category-backdrop"
@@ -1359,8 +1426,20 @@ export function Books() {
 
 function BookRow({
   book,
+  menuOpen,
+  onMenuToggle,
+  onEdit,
+  onDelete,
+  onDetails,
+  menuPosition,
 }: {
   book: Book;
+  menuOpen: boolean;
+  onMenuToggle: (button: HTMLButtonElement) => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onDetails: () => void;
+  menuPosition: { top: number; left: number } | null;
 }) {
   return (
     <tr>
@@ -1421,15 +1500,30 @@ function BookRow({
       </td>
 
       <td>
-        <button
-          type="button"
-          className="book-more-button"
-        >
-          <MoreVertical size={16} />
-        </button>
+        <div className="book-action-menu">
+          <button type="button" className="book-more-button" onClick={(event) => onMenuToggle(event.currentTarget)} aria-label={`Actions for ${book.title}`}>
+            <MoreVertical size={16} />
+          </button>
+          {menuOpen && (
+            <div className="book-action-dropdown" style={menuPosition ? { top: menuPosition.top, left: menuPosition.left } : undefined}>
+              <button type="button" onClick={onEdit}>Edit</button>
+              <button type="button" onClick={onDelete}>Delete</button>
+              <button type="button" onClick={onDetails}>Details</button>
+            </div>
+          )}
+        </div>
       </td>
 
     </tr>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="book-detail-item">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 

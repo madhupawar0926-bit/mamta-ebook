@@ -8,7 +8,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { useBooksContext } from "../../context/BooksContextValue";
@@ -167,8 +167,9 @@ const MAX_DESC = 500;
 export default function AddNewBook() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { root, addBook } = useBooksContext();
-  const categoryId = searchParams.get("categoryId") ?? "";
+  const { root, addBook, getBook, updateBook } = useBooksContext();
+  const editId = searchParams.get("editId");
+  const [categoryId, setCategoryId] = useState(searchParams.get("categoryId") ?? "");
 
   /* -------------------------------------------------------
      FORM STATE
@@ -199,6 +200,40 @@ export default function AddNewBook() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [isLoadingBook, setIsLoadingBook] = useState(Boolean(editId));
+
+  useEffect(() => {
+    if (!editId) return;
+
+    const loadBook = async () => {
+      try {
+        const book = await getBook(editId);
+        if (!book) {
+          setSaveError("Book not found.");
+          return;
+        }
+        setTitle(book.title);
+        setAuthor(book.author);
+        setIsbn(book.isbn);
+        setPrice(String(book.price));
+        setLanguage(book.language);
+        setDescription(book.description);
+        setTags(String(book.pageCount));
+        setAllowPreview(book.allowPreview);
+        setPreviewPages(book.previewPages);
+        setFeatured(book.featured);
+        setPublished(book.published);
+        setCategoryId(book.categoryId);
+      } catch (loadError) {
+        console.error("Failed to load book", loadError);
+        setSaveError("Unable to load the book for editing.");
+      } finally {
+        setIsLoadingBook(false);
+      }
+    };
+
+    void loadBook();
+  }, [editId]);
 
   /* -------------------------------------------------------
      COVER UPLOAD
@@ -247,8 +282,8 @@ export default function AddNewBook() {
     if (allowPreview && Number(tags) >= 0 && previewPages > Number(tags)) {
       e.previewPages = "Preview pages cannot exceed the page count.";
     }
-    if (!coverFile) e.cover = "Book cover is required.";
-    if (!pdfFile) e.pdf = "Ebook PDF is required.";
+    if (!editId && !coverFile) e.cover = "Book cover is required.";
+    if (!editId && !pdfFile) e.pdf = "Ebook PDF is required.";
     return e;
   };
 
@@ -276,7 +311,7 @@ export default function AddNewBook() {
     setSubmitted(true);
 
     try {
-      await addBook({
+      const bookData = {
         title,
         author,
         isbn,
@@ -296,7 +331,12 @@ export default function AddNewBook() {
         coverFile: coverFile ?? undefined,
         pdfFile: pdfFile ?? undefined,
         categoryId,
-      });
+      };
+      if (editId) {
+        await updateBook(editId, bookData);
+      } else {
+        await addBook(bookData);
+      }
       navigate(`/category?selectedId=${encodeURIComponent(categoryId)}`);
     } catch (saveErrorValue) {
       console.error("Failed to save book", saveErrorValue);
@@ -356,8 +396,8 @@ export default function AddNewBook() {
 
       <div className="add-book-page-header">
         <div>
-          <h1>Add New Book</h1>
-          <p>Create a new ebook record.</p>
+          <h1>{editId ? "Edit Book" : "Add New Book"}</h1>
+          <p>{editId ? "Update the ebook record." : "Create a new ebook record."}</p>
         </div>
 
         <div className="page-breadcrumb">
@@ -365,7 +405,7 @@ export default function AddNewBook() {
           <b>›</b>
           <span>Catalogue</span>
           <b>›</b>
-          <strong>Add New Book</strong>
+              <strong>{editId ? "Edit Book" : "Add New Book"}</strong>
         </div>
       </div>
 
@@ -659,7 +699,7 @@ export default function AddNewBook() {
                 type="button"
                 className="draft-button"
                 onClick={() => handleSave(true)}
-                disabled={submitted}
+                disabled={submitted || isLoadingBook}
               >
                 Save Draft
               </button>
@@ -668,9 +708,9 @@ export default function AddNewBook() {
                 type="button"
                 className="primary-button"
                 onClick={() => handleSave(false)}
-                disabled={submitted}
+                disabled={submitted || isLoadingBook}
               >
-                {submitted ? "Saving..." : "Save Book"}
+                {submitted ? "Saving..." : editId ? "Update Book" : "Save Book"}
               </button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, doc, onSnapshot, serverTimestamp, updateDoc } from "firebase/firestore";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { db, storage } from "../firebase";
@@ -11,6 +11,8 @@ import {
 } from "../services/categoryRepository";
 import {
   createBook,
+  deleteBook as deleteBookRecord,
+  getBook as getBookRecord,
   getBooks,
   type BookRecord,
 } from "../services/bookRepository";
@@ -89,6 +91,23 @@ function buildTree(categories: CategoryRecord[], books: BookRecord[]): BookFolde
       image: book.coverImageUrl,
       categoryId: book.categoryId,
       categoryPath: book.categoryPathNames.join("/"),
+      authorName: book.authorName,
+      isbnOrBookCode: book.isbnOrBookCode,
+      pageCount: book.pageCount,
+      publisherName: book.publisherName,
+      currency: book.currency,
+      coverImageUrl: book.coverImageUrl,
+      coverStoragePath: book.coverStoragePath,
+      coverOriginalFileName: book.coverOriginalFileName,
+      pdfFileUrl: book.pdfFileUrl,
+      pdfStoragePath: book.pdfStoragePath,
+      pdfOriginalFileName: book.pdfOriginalFileName,
+      pdfSizeBytes: book.pdfSizeBytes,
+      isFeatured: book.isFeatured,
+      totalPurchases: book.totalPurchases,
+      totalRevenue: book.totalRevenue,
+      categoryPathIds: book.categoryPathIds,
+      categoryPathNames: book.categoryPathNames,
     });
   });
 
@@ -151,8 +170,55 @@ export function BooksProvider({ children }: { children: ReactNode }) {
     await refresh();
   };
 
+  const getBook = async (bookId: string): Promise<NewBookData | null> => {
+    const book = await getBookRecord(db, bookId);
+    if (!book) return null;
+    return {
+      title: book.title,
+      author: book.authorName,
+      isbn: book.isbnOrBookCode,
+      price: book.price,
+      language: book.language,
+      description: book.description,
+      tags: String(book.pageCount),
+      pageCount: book.pageCount,
+      publisherName: book.publisherName,
+      allowPreview: book.allowPreview,
+      previewPages: book.previewPages,
+      featured: book.isFeatured,
+      published: book.status === "published",
+      recommended: false,
+      coverFileName: book.coverOriginalFileName,
+      pdfFileName: book.pdfOriginalFileName,
+      categoryId: book.categoryId,
+    };
+  };
+
+  const updateBook = async (bookId: string, book: NewBookData) => {
+    await updateDoc(doc(db, "books", bookId), {
+      title: book.title.trim(),
+      authorName: book.author.trim(),
+      isbnOrBookCode: book.isbn.trim(),
+      price: book.price,
+      language: book.language.trim(),
+      description: book.description.trim(),
+      pageCount: book.pageCount,
+      publisherName: book.publisherName.trim() || "Mamta Publications",
+      allowPreview: book.allowPreview,
+      previewPages: book.allowPreview ? book.previewPages : 0,
+      isFeatured: book.featured,
+      updatedAt: serverTimestamp(),
+    });
+    await refresh();
+  };
+
+  const deleteBook = async (bookId: string) => {
+    await deleteBookRecord(db, bookId);
+    await refresh();
+  };
+
   return (
-    <BooksContext.Provider value={{ root, addFolder, updateFolder, deleteFolder, refresh, isLoading, error, addBook }}>
+    <BooksContext.Provider value={{ root, addFolder, updateFolder, deleteFolder, refresh, isLoading, error, addBook, updateBook, deleteBook, getBook }}>
       {children}
     </BooksContext.Provider>
   );

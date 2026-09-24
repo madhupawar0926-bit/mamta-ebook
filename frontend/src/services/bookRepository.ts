@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   increment,
   runTransaction,
@@ -46,6 +47,36 @@ export async function getBooks(db: Firestore) {
     ...(item.data() as Omit<BookRecord, "id">),
     id: item.id,
   }));
+}
+
+export async function getBook(db: Firestore, bookId: string) {
+  const snapshot = await getDoc(doc(db, "books", bookId));
+  if (!snapshot.exists()) return null;
+  return { ...(snapshot.data() as Omit<BookRecord, "id">), id: snapshot.id };
+}
+
+export async function deleteBook(db: Firestore, bookId: string) {
+  await runTransaction(db, async (transaction) => {
+    const bookReference = doc(db, "books", bookId);
+    const bookSnapshot = await transaction.get(bookReference);
+    if (!bookSnapshot.exists()) throw new Error("Book no longer exists.");
+
+    const categoryId = String(bookSnapshot.data().categoryId ?? "");
+    if (categoryId) {
+      const categoryReference = doc(db, "categories", categoryId);
+      const categorySnapshot = await transaction.get(categoryReference);
+      if (categorySnapshot.exists()) {
+        const category = categorySnapshot.data() as CategoryRecord;
+        transaction.update(categoryReference, {
+          bookCount: Math.max(0, (category.bookCount ?? 1) - 1),
+          contentType: category.subCategoryCount > 0 ? "categories" : "empty",
+          updatedAt: serverTimestamp(),
+        });
+      }
+    }
+
+    transaction.delete(bookReference);
+  });
 }
 
 export async function createBook(

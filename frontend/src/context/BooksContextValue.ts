@@ -33,6 +33,9 @@ export type BooksContextType = {
   isLoading: boolean;
   error: string;
   addBook: (book: NewBookData) => Promise<void>;
+  updateBook: (bookId: string, book: NewBookData) => Promise<void>;
+  deleteBook: (bookId: string) => Promise<void>;
+  getBook: (bookId: string) => Promise<NewBookData | null>;
 };
 
 export const BooksContext = createContext<BooksContextType | null>(null);
