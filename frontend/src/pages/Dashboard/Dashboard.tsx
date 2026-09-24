@@ -3,158 +3,29 @@ import {
   Users,
   ShoppingCart,
   IndianRupee,
-  TrendingUp,
-  TrendingDown,
   // CalendarDays,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./Dashboard.css";
-
-/* =========================================================
-   STATS
-   ========================================================= */
-
-const stats = [
-  {
-    title: "Total Books",
-    value: "1,850",
-    change: "24 this month",
-    positive: true,
-    footer: "24 Categories",
-    icon: BookOpen,
-    type: "green",
-  },
-  {
-    title: "Total Students",
-    value: "1,600",
-    change: "32 this month",
-    positive: true,
-    footer: "Active users",
-    icon: Users,
-    type: "green",
-  },
-  {
-    title: "Total Purchases",
-    value: "1,250",
-    change: "18 this month",
-    positive: true,
-    footer: "Successful Orders",
-    icon: ShoppingCart,
-    type: "yellow",
-  },
-  {
-    title: "Total Revenue",
-    value: "₹45,000",
-    change: "18.4% vs last month",
-    positive: true,
-    footer: "This Month",
-    icon: IndianRupee,
-    type: "green",
-  },
-];
-
-/* =========================================================
-   REVENUE CHART DATA
-   ========================================================= */
-
-const chartDataByPeriod = {
-  Weekly: [
-    { month: "Mon", revenue: 32, purchases: 18 },
-    { month: "Tue", revenue: 45, purchases: 26 },
-    { month: "Wed", revenue: 38, purchases: 22 },
-    { month: "Thu", revenue: 58, purchases: 35 },
-    { month: "Fri", revenue: 72, purchases: 48 },
-    { month: "Sat", revenue: 64, purchases: 42 },
-    { month: "Sun", revenue: 50, purchases: 31 },
-  ],
-
-  Monthly: [
-    { month: "Jan", revenue: 50, purchases: 40 },
-    { month: "Feb", revenue: 63, purchases: 82 },
-    { month: "Mar", revenue: 74, purchases: 44 },
-    { month: "Apr", revenue: 73, purchases: 30 },
-    { month: "May", revenue: 68, purchases: 30 },
-    { month: "Jun", revenue: 78, purchases: 24 },
-    { month: "Jul", revenue: 54, purchases: 69 },
-    { month: "Aug", revenue: 40, purchases: 24 },
-    { month: "Sep", revenue: 35, purchases: 9 },
-    { month: "Oct", revenue: 30, purchases: 8 },
-    { month: "Nov", revenue: 29, purchases: 9 },
-    { month: "Dec", revenue: 40, purchases: 20 },
-  ],
-
-  Yearly: [
-    { month: "2022", revenue: 42, purchases: 30 },
-    { month: "2023", revenue: 58, purchases: 45 },
-    { month: "2024", revenue: 72, purchases: 61 },
-    { month: "2025", revenue: 65, purchases: 54 },
-    { month: "2026", revenue: 82, purchases: 70 },
-  ],
-};
-
-/* =========================================================
-   CHART SUMMARY
-   ========================================================= */
-
-const chartSummary = {
-  Weekly: {
-    revenue: "₹45,800",
-    purchases: "312",
-  },
-
-  Monthly: {
-    revenue: "₹4,85,000",
-    purchases: "5,420",
-  },
-
-  Yearly: {
-    revenue: "₹52,40,000",
-    purchases: "61,840",
-  },
-};
-
-/* =========================================================
-   TOP BOOKS
-   ========================================================= */
-
-const topBooks = [
-  {
-    title: "Discrete Mathematics",
-    author: "S. Lipshutz",
-    purchases: "120",
-    revenue: "₹35,880",
-    cover:
-      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100&q=80",
-  },
-  {
-    title: "Engineering Mathematics",
-    author: "B.S. Grewal",
-    purchases: "98",
-    revenue: "₹29,302",
-    cover:
-      "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=100&q=80",
-  },
-  {
-    title: "Physics for Class 11",
-    author: "D.C. Pandey",
-    purchases: "76",
-    revenue: "₹22,724",
-    cover:
-      "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=100&q=80",
-  },
-];
+import { db } from "../../firebase";
+import {
+  getDashboardSnapshot,
+  type DashboardPeriod,
+  type DashboardSnapshot,
+} from "../../services/dashboardRepository";
 
 /* =========================================================
    DASHBOARD
    ========================================================= */
 
 export function Dashboard() {
-  const [chartPeriod, setChartPeriod] =
-    useState<keyof typeof chartDataByPeriod>("Monthly");
+  const [chartPeriod, setChartPeriod] = useState<DashboardPeriod>("Monthly");
   const [selectedYear, setSelectedYear] = useState("2026");
+  const [dashboard, setDashboard] = useState<DashboardSnapshot | null>(null);
+  const [loadError, setLoadError] = useState("");
 
   /* =========================================================
      HOVERED GRAPH BAR
@@ -170,15 +41,29 @@ export function Dashboard() {
 
 
 
-  const activeChartData =
-    chartPeriod === "Yearly"
-      ? chartDataByPeriod.Yearly.filter(
-          (item) => item.month === selectedYear
-        )
-      : chartDataByPeriod[chartPeriod];
+  useEffect(() => {
+    getDashboardSnapshot(db)
+      .then(setDashboard)
+      .catch((error) => {
+        console.error("Failed to load dashboard", error);
+        setLoadError("Unable to load dashboard data.");
+      });
+  }, []);
 
-  const activeSummary =
-    chartSummary[chartPeriod];
+  if (!dashboard) {
+    return <div className="dashboard-page">{loadError || "Loading dashboard..."}</div>;
+  }
+
+  const activeChartData = dashboard.chartData[chartPeriod].filter(
+    (item) => chartPeriod !== "Yearly" || item.month === selectedYear
+  );
+  const activeSummary = dashboard.summaries[chartPeriod];
+  const stats = [
+    { title: "Total Books", value: dashboard.stats.totalBooks.toLocaleString(), footer: `${dashboard.stats.categoryCount} Categories`, icon: BookOpen, type: "green", positive: true },
+    { title: "Total Students", value: dashboard.stats.totalStudents.toLocaleString(), footer: "Active users", icon: Users, type: "green", positive: true },
+    { title: "Total Purchases", value: dashboard.stats.totalPurchases.toLocaleString(), footer: "Successful Orders", icon: ShoppingCart, type: "yellow", positive: true },
+    { title: "Total Revenue", value: `₹${dashboard.stats.totalRevenue.toLocaleString("en-IN")}`, footer: "Successful sales", icon: IndianRupee, type: "green", positive: true },
+  ];
 
   /* =========================================================
      DATE FORMATTER
@@ -344,8 +229,8 @@ export function Dashboard() {
                 className="year-select"
                 value={chartPeriod}
                 onChange={(e) => {
-                  setChartPeriod(
-                    e.target.value as keyof typeof chartDataByPeriod
+                    setChartPeriod(
+                    e.target.value as DashboardPeriod
                   );
 
                   setHoveredChartMonth(null);
@@ -376,7 +261,7 @@ export function Dashboard() {
                   }}
                   aria-label="Select year"
                 >
-                  {chartDataByPeriod.Yearly.map((item) => (
+                  {dashboard.chartData.Yearly.map((item) => (
                     <option value={item.month} key={item.month}>
                       {item.month}
                     </option>
@@ -562,7 +447,7 @@ export function Dashboard() {
               </span>
 
               <strong>
-                {activeSummary.revenue}
+                ₹{activeSummary.revenue.toLocaleString("en-IN")}
               </strong>
 
             </div>
@@ -574,7 +459,7 @@ export function Dashboard() {
               </span>
 
               <strong>
-                {activeSummary.purchases}
+                {activeSummary.purchases.toLocaleString()}
               </strong>
 
             </div>
@@ -618,7 +503,7 @@ export function Dashboard() {
 
           <div className="books-list">
 
-            {topBooks.map((book) => (
+            {dashboard.topBooks.map((book) => (
 
               <div
                 className="book-row"
@@ -647,11 +532,11 @@ export function Dashboard() {
                 </div>
 
                 <span className="book-purchases">
-                  {book.purchases}
+                  {book.purchases.toLocaleString()}
                 </span>
 
                 <span className="book-revenue">
-                  {book.revenue}
+                  ₹{book.revenue.toLocaleString("en-IN")}
                 </span>
 
               </div>

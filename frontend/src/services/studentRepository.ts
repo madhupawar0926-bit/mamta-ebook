@@ -133,17 +133,19 @@ export async function getStudentDevices(
     const data = device.data();
     const platform = String(data.platform ?? data.deviceType ?? "Android");
     const model = String(
-      data.deviceModel ?? data.model ?? data.deviceInfo ?? "Unknown model"
+      data.deviceModel ?? data.model ?? data.deviceInfo ?? data.name ?? "Unknown model"
     );
     const kind = /windows|mac|linux|desktop|laptop/i.test(`${platform} ${model}`)
       ? "laptop"
       : "phone";
     return {
       id: device.id,
-      name: String(data.deviceName ?? data.name ?? platform),
+      name: String(data.deviceName ?? data.deviceLabel ?? platform),
       model,
       details: `${platform} · ${String(data.browser ?? data.osVersion ?? "Device")}`,
-      lastActive: data.lastActiveAt ? formatDate(data.lastActiveAt) : "Last active unavailable",
+      lastActive: data.lastActiveAt || data.lastSeen
+        ? formatDate(data.lastActiveAt ?? data.lastSeen)
+        : "Last active unavailable",
       kind,
     };
   });

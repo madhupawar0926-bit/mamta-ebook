@@ -577,13 +577,13 @@ export default function StudentDetails() {
                   </span>
                 </div>
 
-                <div className="profile-contact">
+                {/* <div className="profile-contact">
                   <Mail size={12} />
 
                   <span>
                     {selectedStudent.email}
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
 
