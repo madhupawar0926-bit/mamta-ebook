@@ -300,10 +300,20 @@ export default function AddNewBook() {
       navigate(`/category?selectedId=${encodeURIComponent(categoryId)}`);
     } catch (saveErrorValue) {
       console.error("Failed to save book", saveErrorValue);
+      const errorCode =
+        typeof saveErrorValue === "object" &&
+        saveErrorValue !== null &&
+        "code" in saveErrorValue
+          ? String(saveErrorValue.code)
+          : "";
+      const errorMessage =
+        saveErrorValue instanceof Error ? saveErrorValue.message : "";
       setSaveError(
-        saveErrorValue instanceof Error && saveErrorValue.message
-          ? saveErrorValue.message
-          : "Unable to save the book. Please try again."
+        errorCode.includes("storage/unauthorized")
+          ? "You do not have permission to upload this book cover or PDF."
+          : errorCode.includes("permission-denied")
+            ? "You do not have permission to save books."
+            : errorMessage || "Unable to save the book. Please try again."
       );
       setSubmitted(false);
     }
@@ -514,13 +524,27 @@ export default function AddNewBook() {
                   type="text"
                   placeholder="Enter number of pages"
                   value={tags}
+                  className={errors.tags ? "input-error" : ""}
  onChange={(e) => {
       const value = e.target.value;
 
       if (/^\d*$/.test(value)) {
         setTags(value);
+        setErrors((prev) => ({ ...prev, tags: undefined, previewPages: undefined }));
       }
     }}                />
+                {errors.tags && (
+                  <p className="field-error">
+                    <AlertCircle size={11} />
+                    {errors.tags}
+                  </p>
+                )}
+                {errors.previewPages && (
+                  <p className="field-error">
+                    <AlertCircle size={11} />
+                    {errors.previewPages}
+                  </p>
+                )}
               </div>
 
             </div>
