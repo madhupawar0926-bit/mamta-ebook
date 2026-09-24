@@ -4,7 +4,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Mail,
   MoreVertical,
   Laptop,
   Phone,
@@ -55,6 +54,7 @@ const avatarClasses = [
 
 export default function StudentDetails() {
   const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [rowMenuStudentId, setRowMenuStudentId] = useState<string | null>(null);
   const [isDevicesModalOpen, setIsDevicesModalOpen] = useState(false);
   const [students, setStudents] = useState<StudentRecord[]>([]);
   const [purchasedBooks, setPurchasedBooks] = useState<PurchasedBookRecord[]>([]);
@@ -165,6 +165,18 @@ export default function StudentDetails() {
     const safePage = Math.max(1, Math.min(totalPages, newPage));
 
     setPage(safePage);
+  };
+
+  const handleBanStudent = (studentId: string) => {
+    setStudents((currentStudents) =>
+      currentStudents.map((student) =>
+        student.id === studentId
+          ? { ...student, status: "Banned", accountStatus: "Banned" }
+          : student
+      )
+    );
+
+    setRowMenuStudentId(null);
   };
 
   if (isLoading) {
@@ -428,16 +440,39 @@ export default function StudentDetails() {
 
                     {/* MORE */}
 
-                    <td>
-                      <button
-                        type="button"
-                        className="row-more-button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                        }}
-                      >
-                        <MoreVertical size={16} />
-                      </button>
+                    <td className="action-cell">
+                      <div className="row-action-wrap">
+                        <button
+                          type="button"
+                          className="row-more-button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setRowMenuStudentId((current) =>
+                              current === student.id ? null : student.id
+                            );
+                          }}
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+
+                        {rowMenuStudentId === student.id && (
+                          <div
+                            className="row-menu"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              className="row-menu-item"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleBanStudent(student.id);
+                              }}
+                            >
+                              Ban Student
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -696,27 +731,42 @@ export default function StudentDetails() {
             </div>
 
             <div className="purchased-books-list">
-              {purchasedBooks.map((book) => (
-                <div
-                  className="purchased-book"
-                  key={book.title}
-                >
-                  <img
-                    src={book.image}
-                    alt={book.title}
-                  />
+              {purchasedBooks.map((book) => {
+                const bookInitials = (book.title || "B")
+                  .split(" ")
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((part) => part[0]?.toUpperCase() ?? "")
+                  .join("") || "B";
 
-                  <div className="purchased-book-info">
-                    <strong>{book.title}</strong>
+                return (
+                  <div
+                    className="purchased-book"
+                    key={`${book.id}-${book.title}`}
+                  >
+                    {book.image ? (
+                      <img
+                        src={book.image}
+                        alt={book.title}
+                      />
+                    ) : (
+                      <div className="purchased-book-placeholder">
+                        {bookInitials}
+                      </div>
+                    )}
 
-                    <span>{book.date}</span>
+                    <div className="purchased-book-info">
+                      <strong>{book.title}</strong>
+
+                      <span>{book.date}</span>
+                    </div>
+
+                    <span className="book-price">
+                      {book.price}
+                    </span>
                   </div>
-
-                  <span className="book-price">
-                    {book.price}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

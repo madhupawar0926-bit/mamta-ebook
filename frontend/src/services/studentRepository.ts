@@ -72,35 +72,58 @@ function statusFor(data: Record<string, unknown>): StudentRecord["status"] {
   return "Active";
 }
 
+function getCoverImage(data: Record<string, unknown>): string {
+  const imageUrl =
+    (data.coverImageUrl as string | undefined) ??
+    (data.cover as string | undefined) ??
+    (data.image as string | undefined) ??
+    (data.bookImageUrl as string | undefined) ??
+    (data.coverUrl as string | undefined) ??
+    (data.imageUrl as string | undefined) ??
+    "";
+
+  return typeof imageUrl === "string" ? imageUrl : "";
+}
+
 export async function getStudents(db: Firestore): Promise<StudentRecord[]> {
   const snapshot = await getDocs(
     query(collection(db, "users"), where("role", "==", "student"))
   );
 
-  return snapshot.docs.map((student) => {
-    const data = student.data();
-    const name = String(data.name ?? "Unnamed student");
-    const accountStatus = String(data.accountStatus ?? "active");
-    const status = statusFor(data);
-    const spent = Number(data.totalSpent ?? 0);
+  return snapshot.docs
+    .map((student) => {
+      const data = student.data();
+      const name = String(data.name ?? "Unnamed student");
+      const accountStatus = String(data.accountStatus ?? "active");
+      const status = statusFor(data);
+      const spent = Number(data.totalSpent ?? 0);
 
-    return {
-      id: student.id,
-      initials: initials(name),
-      name,
-      phone: String(data.phoneNumber ?? "Not available"),
-      email: String(data.email ?? "Not available"),
-      books: Number(data.booksPurchased ?? 0),
-      spent,
-      status,
-      registrationDate: formatDate(data.createdAt),
-      lastActive: formatDate(data.lastActiveAt, "Not available"),
-      accountStatus: accountStatus === "banned" ? "Banned" : "Active",
-      booksPurchased: `${Number(data.booksPurchased ?? 0)} Books`,
-      totalSpent: `Rs.${spent.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
-      securityMistakes: Number(data.securityMistakes ?? 0),
-    };
-  });
+      return {
+        id: student.id,
+        initials: initials(name),
+        name,
+        phone: String(data.phoneNumber ?? "Not available"),
+        email: String(data.email ?? "Not available"),
+        books: Number(data.booksPurchased ?? 0),
+        spent,
+        status,
+        registrationDate: formatDate(data.createdAt),
+        lastActive: formatDate(data.lastActiveAt, "Not available"),
+        accountStatus: accountStatus === "banned" ? "Banned" : "Active",
+        booksPurchased: `${Number(data.booksPurchased ?? 0)} Books`,
+        totalSpent: `Rs.${spent.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
+        securityMistakes: Number(data.securityMistakes ?? 0),
+      };
+    })
+    .sort((a, b) => {
+      const aDate = a.registrationDate;
+      const bDate = b.registrationDate;
+
+      if (aDate === "Not available") return 1;
+      if (bDate === "Not available") return -1;
+
+      return bDate.localeCompare(aDate);
+    });
 }
 
 export async function getStudentPurchases(
@@ -112,13 +135,13 @@ export async function getStudentPurchases(
   );
 
   return snapshot.docs.map((purchase) => {
-    const data = purchase.data();
+    const data = purchase.data() as Record<string, unknown>;
     return {
       id: purchase.id,
-      title: String(data.bookTitle ?? "Untitled book"),
+      title: String(data.bookTitle ?? data.title ?? "Untitled book"),
       date: `Purchased on ${formatDate(data.purchasedAt, "date unavailable")}`,
       price: `Rs.${Number(data.amountPaid ?? data.originalPrice ?? 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
-      image: String(data.coverImageUrl ?? ""),
+      image: getCoverImage(data),
     };
   });
 }
@@ -138,14 +161,14 @@ export async function getStudentDevices(
     const kind = /windows|mac|linux|desktop|laptop/i.test(`${platform} ${model}`)
       ? "laptop"
       : "phone";
+    const lastActiveValue = data.lastActiveAt ?? data.lastSeenAt ?? data.lastSeen ?? null;
+
     return {
       id: device.id,
       name: String(data.deviceName ?? data.deviceLabel ?? platform),
       model,
       details: `${platform} · ${String(data.browser ?? data.osVersion ?? "Device")}`,
-      lastActive: data.lastActiveAt || data.lastSeen
-        ? formatDate(data.lastActiveAt ?? data.lastSeen)
-        : "Last active unavailable",
+      lastActive: lastActiveValue ? formatDate(lastActiveValue) : "Last active unavailable",
       kind,
     };
   });

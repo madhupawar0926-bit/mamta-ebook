@@ -452,6 +452,13 @@
   padding: 0 !important;
 }
 
+.row-action-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .row-more-button {
   width: 24px;
   height: 30px;
@@ -467,6 +474,38 @@
 
 .row-more-button:hover {
   color: #009b63;
+}
+
+.row-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 90;
+  min-width: 130px;
+  padding: 6px;
+  border: 1px solid #e5eaee;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+}
+
+.row-menu-item {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #27364d;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  z-index: 90;
+}
+
+.row-menu-item:hover {
+  background: #f3faf6;
+  color: #0d7d49;
 }
 
 .students-empty {
@@ -1000,6 +1039,19 @@
   object-fit: cover;
   border-radius: 3px;
   background: #eef2f4;
+}
+
+.purchased-book-placeholder {
+  width: 36px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  color: #16834d;
+  background: #eafaf0;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .purchased-book-info {
