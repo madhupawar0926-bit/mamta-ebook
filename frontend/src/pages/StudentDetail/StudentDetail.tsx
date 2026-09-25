@@ -157,14 +157,27 @@ export default function StudentDetails() {
 
       return matchesStatus && matchesSearch;
     });
-  }, [statusFilter, search]);
+  }, [students, statusFilter, search]);
 
   useEffect(() => {
-    if (filteredStudents.length === 0) return;
+    if (!students.length) {
+      setSelectedStudentId("");
+      setPurchasedBooks([]);
+      setLoginDevices([]);
+      return;
+    }
+
+    if (filteredStudents.length === 0) {
+      setSelectedStudentId("");
+      setPurchasedBooks([]);
+      setLoginDevices([]);
+      return;
+    }
+
     if (!filteredStudents.some((student) => student.id === selectedStudentId)) {
       setSelectedStudentId(filteredStudents[0].id);
     }
-  }, [filteredStudents, selectedStudentId]);
+  }, [filteredStudents, selectedStudentId, students]);
 
   /* =======================================================
      PAGINATION
@@ -176,13 +189,21 @@ export default function StudentDetails() {
     setPage(safePage);
   };
 
-  const handleBanStudent = (studentId: string) => {
+  const handleToggleBanStudent = (studentId: string) => {
     setStudents((currentStudents) =>
-      currentStudents.map((student) =>
-        student.id === studentId
-          ? { ...student, status: "Banned", accountStatus: "Banned" }
-          : student
-      )
+      currentStudents.map((student) => {
+        if (student.id !== studentId) {
+          return student;
+        }
+
+        const nextIsBanned = student.status !== "Banned";
+
+        return {
+          ...student,
+          status: nextIsBanned ? "Banned" : "Active",
+          accountStatus: nextIsBanned ? "Banned" : "Active",
+        };
+      })
     );
 
     setRowMenuStudentId(null);
@@ -363,14 +384,14 @@ export default function StudentDetails() {
               </div>
 
               {/* MORE */}
-
+{/* 
               <button
                 type="button"
                 className="student-more-button"
                 aria-label="More options"
               >
                 <MoreVertical size={18} />
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -390,7 +411,7 @@ export default function StudentDetails() {
 
                   <th>Status</th>
 
-                  <th className="action-column"></th>
+                  {/* <th className="action-column"></th> */}
                 </tr>
               </thead>
 
@@ -449,7 +470,7 @@ export default function StudentDetails() {
 
                     {/* MORE */}
 
-                    <td className="action-cell">
+                    {/* <td className="action-cell">
                       <div className="row-action-wrap">
                         <button
                           type="button"
@@ -474,15 +495,17 @@ export default function StudentDetails() {
                               className="row-menu-item"
                               onClick={(event) => {
                                 event.stopPropagation();
-                                handleBanStudent(student.id);
+                                handleToggleBanStudent(student.id);
                               }}
                             >
-                              Ban Student
+                              {student.status === "Banned"
+                                ? "Unban Student"
+                                : "Ban Student"}
                             </button>
                           </div>
                         )}
                       </div>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
 
@@ -786,10 +809,13 @@ export default function StudentDetails() {
             <button
               type="button"
               className="ban-student-button"
+              onClick={() => handleToggleBanStudent(selectedStudent.id)}
             >
               <UserRound size={16} />
 
-              Ban Student
+              {selectedStudent.status === "Banned"
+                ? "Unban Student"
+                : "Ban Student"}
             </button>
           </div>
         </aside>
