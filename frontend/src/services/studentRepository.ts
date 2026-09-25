@@ -73,17 +73,34 @@ function statusFor(data: Record<string, unknown>): StudentRecord["status"] {
 }
 
 export async function getStudents(db: Firestore): Promise<StudentRecord[]> {
-  const snapshot = await getDocs(
-    query(collection(db, "users"), where("role", "==", "student"))
-  );
+  const [studentSnapshot, purchaseSnapshot] = await Promise.all([
+    getDocs(query(collection(db, "users"), where("role", "==", "student"))),
+    getDocs(collection(db, "purchases")),
+  ]);
 
-  return snapshot.docs
+  const purchaseCounts = new Map<string, number>();
+  const purchaseTotals = new Map<string, number>();
+
+  purchaseSnapshot.docs.forEach((purchaseDoc) => {
+    const data = purchaseDoc.data() as Record<string, unknown>;
+    const studentId = String(data.studentUid ?? data.studentId ?? data.uid ?? "");
+
+    if (!studentId) return;
+
+    const amount = Number(data.amountPaid ?? data.originalPrice ?? 0);
+
+    purchaseCounts.set(studentId, (purchaseCounts.get(studentId) ?? 0) + 1);
+    purchaseTotals.set(studentId, (purchaseTotals.get(studentId) ?? 0) + amount);
+  });
+
+  return studentSnapshot.docs
     .map((student) => {
       const data = student.data();
       const name = String(data.name ?? "Unnamed student");
       const accountStatus = String(data.accountStatus ?? "active");
       const status = statusFor(data);
-      const spent = Number(data.totalSpent ?? 0);
+      const spent = purchaseTotals.get(student.id) ?? Number(data.totalSpent ?? 0);
+      const books = purchaseCounts.get(student.id) ?? Number(data.booksPurchased ?? 0);
 
       return {
         id: student.id,
@@ -91,13 +108,13 @@ export async function getStudents(db: Firestore): Promise<StudentRecord[]> {
         name,
         phone: String(data.phoneNumber ?? "Not available"),
         email: String(data.email ?? "Not available"),
-        books: Number(data.booksPurchased ?? 0),
+        books,
         spent,
         status,
         registrationDate: formatDate(data.createdAt),
         lastActive: formatDate(data.lastActiveAt, "Not available"),
         accountStatus: accountStatus === "banned" ? "Banned" : "Active",
-        booksPurchased: `${Number(data.booksPurchased ?? 0)} Books`,
+        booksPurchased: `${books} Books`,
         totalSpent: `Rs.${spent.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
         securityMistakes: Number(data.securityMistakes ?? 0),
       };

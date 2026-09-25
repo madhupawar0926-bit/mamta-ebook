@@ -4,7 +4,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  MoreVertical,
   Laptop,
   Phone,
   Search,
@@ -54,7 +53,6 @@ const avatarClasses = [
 
 export default function StudentDetails() {
   const [selectedStudentId, setSelectedStudentId] = useState("");
-  const [rowMenuStudentId, setRowMenuStudentId] = useState<string | null>(null);
   const [isDevicesModalOpen, setIsDevicesModalOpen] = useState(false);
   const [students, setStudents] = useState<StudentRecord[]>([]);
   const [purchasedBooks, setPurchasedBooks] = useState<PurchasedBookRecord[]>([]);
@@ -206,7 +204,6 @@ export default function StudentDetails() {
       })
     );
 
-    setRowMenuStudentId(null);
   };
 
   if (isLoading) {
