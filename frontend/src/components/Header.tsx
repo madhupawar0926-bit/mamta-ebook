@@ -202,7 +202,7 @@ function Header({ onMenuClick }: HeaderProps) {
 
       <div className="header-right">
 
-        <div className="header-search">
+        {/* <div className="header-search">
 
           <Search size={18} />
 
@@ -211,7 +211,7 @@ function Header({ onMenuClick }: HeaderProps) {
             placeholder="Search books, users, orders..."
           />
 
-        </div>
+        </div> */}
 
         <div className="notification-wrapper">
           <button
