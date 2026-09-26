@@ -156,7 +156,7 @@ export function Sidebar({
                     <strong>Admin User</strong>
                     <span>Administrator</span>
                   </div>
-                  <ChevronDown size={14} className="user-chevron" />
+                  {/* <ChevronDown size={14} className="user-chevron" /> */}
                 </>
               )}
             </div>
