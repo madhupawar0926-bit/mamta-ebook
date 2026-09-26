@@ -1,3 +1,13 @@
+.earnings-data-status {
+  margin: 0 0 12px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.earnings-data-error {
+  color: #c43d36;
+}
+
 /* =========================================================
    EARNINGS PAGE
 ========================================================= */

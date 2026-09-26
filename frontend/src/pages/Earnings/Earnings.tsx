@@ -11,6 +11,9 @@ import { useEffect, useMemo, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
+import { db } from "../../firebase";
+import { getEarningsPurchases, type EarningsPurchase } from "../../services/earningsRepository";
+
 import "./Earnings.css";
 
 /* =========================================================
@@ -287,8 +290,76 @@ const fallbackData: EarningsData = {
   purchasesGrowth: "15.7% vs last month",
 };
 
-const API_ENDPOINT =
-  "/api/earnings/overview";
+function formatCurrency(value: number) {
+  return `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+}
+
+function buildEarningsData(purchases: EarningsPurchase[]): EarningsData {
+  const successful = purchases.filter((item) => item.status === "Success");
+  const pending = purchases.filter((item) => item.status === "Pending");
+  const failed = purchases.filter((item) => item.status === "Failed");
+  const revenue = successful.reduce((sum, item) => sum + item.amount, 0);
+  const monthly = new Map<string, { revenue: number; purchases: number; successful: number; failed: number; pending: number }>();
+
+  purchases.forEach((item) => {
+    const month = item.date.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+    const current = monthly.get(month) ?? { revenue: 0, purchases: 0, successful: 0, failed: 0, pending: 0 };
+    current.purchases += 1;
+    const countKey = item.status === "Success" ? "successful" : item.status.toLowerCase();
+    current[countKey as "successful" | "failed" | "pending"] += 1;
+    if (item.status === "Success") current.revenue += item.amount;
+    monthly.set(month, current);
+  });
+
+  const monthlyData = [...monthly.entries()].map(([month, value]) => ({
+    month,
+    revenue: formatCurrency(value.revenue),
+    purchases: String(value.purchases),
+    successful: String(value.successful),
+    failed: String(value.failed),
+    pending: String(value.pending),
+  }));
+  const chartData = [...monthly.entries()].map(([label, value]) => ({
+    label,
+    revenue: value.revenue / 1000,
+    purchases: value.purchases,
+  }));
+  const breakdown = [
+    { label: "Book Sales", value: revenue, dotClass: "green-dot" as const },
+    { label: "Discounts Given", value: 0, dotClass: "blue-dot" as const },
+    { label: "Coupons Used", value: 0, dotClass: "purple-dot" as const },
+    { label: "Tax (GST)", value: 0, dotClass: "orange-dot" as const },
+  ];
+
+  return {
+    stats: [
+      { title: "Total Revenue", value: formatCurrency(revenue), change: "From successful purchases", type: "positive", icon: IndianRupee, iconClass: "green" },
+      { title: "Total Purchases", value: String(purchases.length), change: "All purchase records", type: "positive", icon: ShoppingCart, iconClass: "green" },
+      { title: "Successful Payments", value: String(successful.length), change: "Payment status: paid", type: "positive", icon: CheckCircle2, iconClass: "blue" },
+      { title: "Pending Payments", value: String(pending.length), change: `${failed.length} failed`, type: pending.length ? "warning" : "positive", icon: Clock3, iconClass: "orange" },
+    ],
+    monthlyData,
+    transactions: purchases.map((item) => ({
+      id: item.orderId,
+      student: item.student,
+      book: item.book,
+      amount: formatCurrency(item.amount),
+      status: item.status,
+      date: item.date.getTime() ? item.date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Date unavailable",
+    })),
+    chartData,
+    breakdown: breakdown.map((item) => ({
+      label: item.label,
+      value: formatCurrency(item.value),
+      percentage: revenue ? Number(((item.value / revenue) * 100).toFixed(1)) : 0,
+      dotClass: item.dotClass,
+    })),
+    totalRevenue: formatCurrency(revenue),
+    totalPurchases: String(purchases.length),
+    revenueGrowth: "Live Firestore data",
+    purchasesGrowth: "Live Firestore data",
+  };
+}
 
 /* =========================================================
    EARNINGS
@@ -297,9 +368,12 @@ const API_ENDPOINT =
 export default function Earnings() {
   const [data, setData] =
     useState<EarningsData>(fallbackData);
+  const [activeTab, setActiveTab] = useState<"overview" | "transactions">("overview");
 
   const [range, setRange] =
     useState("30D");
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   /* =======================================================
      DATE RANGE PICKER
@@ -335,42 +409,19 @@ export default function Earnings() {
      ======================================================= */
 
   useEffect(() => {
-    let active = true;
-
     const load = async () => {
       try {
-        const response = await fetch(
-          `${
-            import.meta.env
-              .VITE_API_BASE_URL || ""
-          }${API_ENDPOINT}`,
-          {
-            credentials: "include",
-          }
-        );
-
-        if (!response.ok) return;
-
-        const payload =
-          (await response.json()) as Partial<EarningsData>;
-
-        if (active) {
-          setData((current) => ({
-            ...current,
-            ...payload,
-          }));
-        }
-      } catch {
-        // Keep fallback data silently
-        // until API is connected.
+        const purchases = await getEarningsPurchases(db);
+        setData(buildEarningsData(purchases));
+      } catch (error) {
+        console.error("Failed to load earnings", error);
+        setLoadError("Unable to load earnings data.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    load();
-
-    return () => {
-      active = false;
-    };
+    void load();
   }, []);
 
   /* =======================================================
@@ -380,7 +431,11 @@ export default function Earnings() {
   const chart = useMemo(() => {
     const width = 900;
     const height = 240;
-    const max = 50;
+    const maxValue = Math.max(
+      ...data.chartData.flatMap((item) => [item.revenue, item.purchases]),
+      1
+    );
+    const max = maxValue * 1.2;
     const top = 10;
     const bottom = 220;
 
@@ -474,6 +529,15 @@ export default function Earnings() {
   return (
     <div className="earnings-page">
 
+      {isLoading && (
+        <p className="earnings-data-status">Loading earnings...</p>
+      )}
+      {loadError && (
+        <p className="earnings-data-status earnings-data-error" role="alert">
+          {loadError}
+        </p>
+      )}
+
       {/* ===================================================
           TOP TABS + DATE
       =================================================== */}
@@ -483,25 +547,27 @@ export default function Earnings() {
         <div className="earnings-tabs">
 
           <button
-            className="earnings-tab active"
+            className={`earnings-tab ${activeTab === "overview" ? "active" : ""}`}
             type="button"
+            onClick={() => setActiveTab("overview")}
           >
             Overview
           </button>
 
           <button
-            className="earnings-tab"
+            className={`earnings-tab ${activeTab === "transactions" ? "active" : ""}`}
             type="button"
+            onClick={() => setActiveTab("transactions")}
           >
             Transactions
           </button>
 
-          <button
+          {/* <button
             className="earnings-tab"
             type="button"
           >
             Coupons
-          </button>
+          </button> */}
 
         </div>
 
@@ -600,7 +666,7 @@ export default function Earnings() {
           REVENUE OVERVIEW + BREAKDOWN
       =================================================== */}
 
-      <section className="revenue-section">
+      <section className="revenue-section" style={{ display: activeTab === "overview" ? "" : "none" }}>
 
         <div className="revenue-layout">
 
@@ -719,11 +785,11 @@ export default function Earnings() {
 
                 <div className="chart-y-axis">
 
-                  <span>50K</span>
-                  <span>40K</span>
-                  <span>30K</span>
-                  <span>20K</span>
-                  <span>10K</span>
+                  <span>50</span>
+                  <span>40</span>
+                  <span>30</span>
+                  <span>20</span>
+                  <span>10</span>
                   <span>0</span>
 
                 </div>
@@ -971,7 +1037,7 @@ export default function Earnings() {
             MONTHLY SUMMARY
         ================================================= */}
 
-        <section className="earnings-panel">
+        <section className="earnings-panel" style={{ display: activeTab === "overview" ? "" : "none" }}>
 
           <div className="panel-header">
 
@@ -1075,7 +1141,7 @@ export default function Earnings() {
             RECENT TRANSACTIONS
         ================================================= */}
 
-        <section className="earnings-panel">
+        <section className="earnings-panel" style={{ display: activeTab === "transactions" ? "" : "none" }}>
 
           <div className="panel-header">
 

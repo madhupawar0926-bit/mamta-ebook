@@ -4,8 +4,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Mail,
-  MoreVertical,
   Laptop,
   Phone,
   Search,
@@ -86,12 +84,8 @@ export default function StudentDetails() {
   useEffect(() => {
     const loadStudents = async () => {
       try {
-        const [records, stats] = await Promise.all([
-          getStudents(db),
-          getPurchaseStats(db),
-        ]);
+        const records = await getStudents(db);
         setStudents(records);
-        setPurchaseStats(stats);
         setSelectedStudentId((current) => current || records[0]?.id || "");
       } catch (error) {
         console.error("Failed to load students", error);
@@ -102,6 +96,19 @@ export default function StudentDetails() {
     };
 
     void loadStudents();
+  }, []);
+
+  useEffect(() => {
+    const loadPurchaseStats = async () => {
+      try {
+        const stats = await getPurchaseStats(db);
+        setPurchaseStats(stats);
+      } catch (error) {
+        console.error("Failed to load purchase stats", error);
+      }
+    };
+
+    void loadPurchaseStats();
   }, []);
 
   useEffect(() => {
@@ -148,14 +155,27 @@ export default function StudentDetails() {
 
       return matchesStatus && matchesSearch;
     });
-  }, [statusFilter, search]);
+  }, [students, statusFilter, search]);
 
   useEffect(() => {
-    if (filteredStudents.length === 0) return;
+    if (!students.length) {
+      setSelectedStudentId("");
+      setPurchasedBooks([]);
+      setLoginDevices([]);
+      return;
+    }
+
+    if (filteredStudents.length === 0) {
+      setSelectedStudentId("");
+      setPurchasedBooks([]);
+      setLoginDevices([]);
+      return;
+    }
+
     if (!filteredStudents.some((student) => student.id === selectedStudentId)) {
       setSelectedStudentId(filteredStudents[0].id);
     }
-  }, [filteredStudents, selectedStudentId]);
+  }, [filteredStudents, selectedStudentId, students]);
 
   /* =======================================================
      PAGINATION
@@ -165,6 +185,25 @@ export default function StudentDetails() {
     const safePage = Math.max(1, Math.min(totalPages, newPage));
 
     setPage(safePage);
+  };
+
+  const handleToggleBanStudent = (studentId: string) => {
+    setStudents((currentStudents) =>
+      currentStudents.map((student) => {
+        if (student.id !== studentId) {
+          return student;
+        }
+
+        const nextIsBanned = student.status !== "Banned";
+
+        return {
+          ...student,
+          status: nextIsBanned ? "Banned" : "Active",
+          accountStatus: nextIsBanned ? "Banned" : "Active",
+        };
+      })
+    );
+
   };
 
   if (isLoading) {
@@ -342,14 +381,14 @@ export default function StudentDetails() {
               </div>
 
               {/* MORE */}
-
+{/* 
               <button
                 type="button"
                 className="student-more-button"
                 aria-label="More options"
               >
                 <MoreVertical size={18} />
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -369,7 +408,7 @@ export default function StudentDetails() {
 
                   <th>Status</th>
 
-                  <th className="action-column"></th>
+                  {/* <th className="action-column"></th> */}
                 </tr>
               </thead>
 
@@ -428,17 +467,42 @@ export default function StudentDetails() {
 
                     {/* MORE */}
 
-                    <td>
-                      <button
-                        type="button"
-                        className="row-more-button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                        }}
-                      >
-                        <MoreVertical size={16} />
-                      </button>
-                    </td>
+                    {/* <td className="action-cell">
+                      <div className="row-action-wrap">
+                        <button
+                          type="button"
+                          className="row-more-button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setRowMenuStudentId((current) =>
+                              current === student.id ? null : student.id
+                            );
+                          }}
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+
+                        {rowMenuStudentId === student.id && (
+                          <div
+                            className="row-menu"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              className="row-menu-item"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleToggleBanStudent(student.id);
+                              }}
+                            >
+                              {student.status === "Banned"
+                                ? "Unban Student"
+                                : "Ban Student"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td> */}
                   </tr>
                 ))}
 
@@ -577,13 +641,13 @@ export default function StudentDetails() {
                   </span>
                 </div>
 
-                <div className="profile-contact">
+                {/* <div className="profile-contact">
                   <Mail size={12} />
 
                   <span>
                     {selectedStudent.email}
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -696,27 +760,42 @@ export default function StudentDetails() {
             </div>
 
             <div className="purchased-books-list">
-              {purchasedBooks.map((book) => (
-                <div
-                  className="purchased-book"
-                  key={book.title}
-                >
-                  <img
-                    src={book.image}
-                    alt={book.title}
-                  />
+              {purchasedBooks.map((book) => {
+                const bookInitials = (book.title || "B")
+                  .split(" ")
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((part) => part[0]?.toUpperCase() ?? "")
+                  .join("") || "B";
 
-                  <div className="purchased-book-info">
-                    <strong>{book.title}</strong>
+                return (
+                  <div
+                    className="purchased-book"
+                    key={`${book.id}-${book.title}`}
+                  >
+                    {book.image ? (
+                      <img
+                        src={book.image}
+                        alt={book.title}
+                      />
+                    ) : (
+                      <div className="purchased-book-placeholder">
+                        {bookInitials}
+                      </div>
+                    )}
 
-                    <span>{book.date}</span>
+                    <div className="purchased-book-info">
+                      <strong>{book.title}</strong>
+
+                      <span>{book.date}</span>
+                    </div>
+
+                    <span className="book-price">
+                      {book.price}
+                    </span>
                   </div>
-
-                  <span className="book-price">
-                    {book.price}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -727,10 +806,13 @@ export default function StudentDetails() {
             <button
               type="button"
               className="ban-student-button"
+              onClick={() => handleToggleBanStudent(selectedStudent.id)}
             >
               <UserRound size={16} />
 
-              Ban Student
+              {selectedStudent.status === "Banned"
+                ? "Unban Student"
+                : "Ban Student"}
             </button>
           </div>
         </aside>
